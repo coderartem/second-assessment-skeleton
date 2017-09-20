@@ -13,8 +13,9 @@ public class TweetDto {
 	private Users author;
 	private Long posted;
 	private String content;
-	private InReplyToDto inReplayTo;
-	private Tweet repostOf;
+	
+//	private InReplyToDto inReplayTo;
+//	private Tweet repostOf;
 	
 	
 	public Integer getId() {

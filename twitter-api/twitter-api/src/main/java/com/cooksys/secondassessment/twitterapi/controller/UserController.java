@@ -24,63 +24,66 @@ import com.cooksys.secondassessment.twitterapi.service.UserService;
 public class UserController {
 	
 	
-	private UserService uS;
+	private UserService userSrvice;
 
 
-	public UserController(UserService uS) {
-		this.uS = uS;
+	public UserController(UserService userService) {
+		this.userSrvice = userService;
 	}
 
 	
 	@GetMapping
 	public List<UserDto> getAllUsers(){
-		return uS.getAllUsers();
+		return userSrvice.getAllUsers();
 	}
 	
 	@GetMapping("/@{username}")
 	public UserDto getThatUser(@PathVariable String username){
-		return uS.getThatUser(username);
+		return userSrvice.getThatUser(username);
 	}
 	
 	
 	@PostMapping
 	public UserDto addUser(@RequestBody InputDto input){
-		return uS.createNewUser(input);
+		return userSrvice.createNewUser(input);
 	}
 	
 	@DeleteMapping("@{username}")
 	public UserDto deleteThisMF(@PathVariable String username){
-		return uS.deleteThisMF(username);
+		return userSrvice.deleteThisMF(username);
 	}
 	
 	@PatchMapping("@{username}")
 	public UserDto updateThisMF(@PathVariable String username, @RequestBody InputDto input){
-		return uS.updateThisMF(username, input);
+		return userSrvice.updateThisMF(username, input);
 	}
 	
 	@PostMapping("@{username}/follow")
 	public void followHim(@PathVariable String username, @RequestBody Credentials cred){
-		uS.followHim(username, cred);
+		userSrvice.followHim(username, cred);
 	}
 	
 	@PostMapping("@{username}/unfollow")
 	public void unfollowHim(@PathVariable String username, @RequestBody Credentials cred){
-		uS.unfollowHim(username, cred);
+		userSrvice.unfollowHim(username, cred);
 	}
 	
 	@GetMapping("@{username}/feed")
 	public List<TweetDto> getFeed(@PathVariable String username){
-		return uS.getFeed(username);
+		return userSrvice.getFeed(username);
 	}
 	
 //	@GetMapping("@{username}/tweets")
 //	
 //	@GetMapping("@{username}/mentions")
 //	
-//	@GetMapping("@{username}/followers")
+	@GetMapping("@{username}/followers")
+	public List<UserDto> myFanClub(@PathVariable String username){
+		return userSrvice.myFanClub(username);
+	}
 	
 	@GetMapping("@{username}/following")
 	public List<UserDto> whoAmIFollowing(@PathVariable String username){
-		return uS.whoAmIFollowing(username);
+		return userSrvice.whoAmIFollowing(username);
 	}
 }

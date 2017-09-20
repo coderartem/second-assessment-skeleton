@@ -17,8 +17,9 @@ public class ConvertInput {
 	public Users getUser(){
 			user.setUsername(input.getCredentials().getUsernam());
 			user.setProfile(input.getProfile());
-			user.setJoined(new Timestamp(0).getTime());
+			user.setJoined(new Timestamp(System.currentTimeMillis()).getTime());
 			user.setCredentials(input.getCredentials());
+			user.setDeleted(false);
 		return user;
 	}
 }

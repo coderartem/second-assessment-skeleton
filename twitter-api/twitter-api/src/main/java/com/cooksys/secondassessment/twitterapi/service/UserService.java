@@ -35,7 +35,7 @@ public class UserService {
 	}
 
 	public UserDto createNewUser(InputDto input) {
-		Users user = new ConvertInput(input).getUser();
+		Users user = new ConvertInput(input).getUser();  ////Zamenit' na Mapper
 		userRepository.save(user);
 		return getThatUser(user.getUsername());
 	}
@@ -103,13 +103,11 @@ public class UserService {
 
 
 	public List<UserDto> whoAmIFollowing(String username) {
-		
 		return uM.usersToUsersDto(userRepository.findByUsername(username).getFollowing());
 	}
 
 
 	public List<UserDto> myFanClub(String username) {
-		
 		return uM.usersToUsersDto(userRepository.findByUsername(username).getFollowers());
 	}
 	

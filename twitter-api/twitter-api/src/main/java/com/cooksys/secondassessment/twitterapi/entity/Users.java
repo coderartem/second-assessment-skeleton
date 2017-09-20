@@ -33,6 +33,10 @@ public class Users {
 	@ManyToMany
 	private List<Users> following;
 	
+	@OneToMany
+	private List<Tweet> postedTweets;
+	
+	
 	
 	
 	public Integer getId() {
@@ -59,14 +63,12 @@ public class Users {
 	public void setJoined(Long joined) {
 		this.joined = joined;
 	}
-
 	public Credentials getCredentials() {
 		return credentials;
 	}
 	public void setCredentials(Credentials credentials) {
 		this.credentials = credentials;
 	}
-	
 	public boolean isDeleted() {
 		return deleted;
 	}
@@ -84,6 +86,12 @@ public class Users {
 	}
 	public void setFollowing(List<Users> following) {
 		this.following = following;
+	}
+	public List<Tweet> getPostedTweets() {
+		return postedTweets;
+	}
+	public void setPostedTweets(List<Tweet> postedTweets) {
+		this.postedTweets = postedTweets;
 	}
 	
 	
