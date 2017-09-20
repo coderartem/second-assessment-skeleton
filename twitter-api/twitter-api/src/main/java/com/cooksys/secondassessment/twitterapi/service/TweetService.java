@@ -10,6 +10,7 @@ import com.cooksys.secondassessment.twitterapi.converter.TweetCreator;
 import com.cooksys.secondassessment.twitterapi.dto.TweetDto;
 import com.cooksys.secondassessment.twitterapi.dto.UserDto;
 import com.cooksys.secondassessment.twitterapi.entity.Credentials;
+import com.cooksys.secondassessment.twitterapi.entity.Mention;
 import com.cooksys.secondassessment.twitterapi.entity.Tweet;
 import com.cooksys.secondassessment.twitterapi.entity.Users;
 import com.cooksys.secondassessment.twitterapi.input.dto.TweetInput;
@@ -25,12 +26,14 @@ public class TweetService {
 	private UserRepository uR;
 	private TweetRepository tR;
 	private UserMapper uM;
+	private TweetCreator tC;
 
-	public TweetService(TweetMapper tM,  UserRepository uR, TweetRepository tR, UserMapper uM) {
+	public TweetService(TweetMapper tM,  UserRepository uR, TweetRepository tR, UserMapper uM, TweetCreator tC) {
 		this.tM = tM;
 		this.uR = uR;
 		this.tR = tR;
 		this.uM = uM;
+		this.tC = tC;
 	}
 
 
@@ -39,7 +42,7 @@ public class TweetService {
 	}
 
 	public TweetDto postTweet(TweetInput tweetInput) {
-		Tweet tweet = new TweetCreator(tweetInput, uR).createTweet();   //Zamenit' na Mapper
+		Tweet tweet = tC.createTweet(tweetInput);   //Zamenit' na Mapper
 		tR.save(tweet);
 		return tM.tweetToTweetDto(tweet);
 	}
@@ -73,7 +76,8 @@ public class TweetService {
 
 	@Transactional
 	public TweetDto reply(Integer id, TweetInput tweetIn) {
-		Tweet tweet = new TweetCreator(tweetIn, uR).createTweet();  //Zamenit' na Mapper
+		Tweet tweet = tC.createTweet(tweetIn);  //Zamenit' na Mapper
+		tR.saveAndFlush(tweet);
 		Tweet inReplyTo = tR.findByIdAndDeletedAndAuthorDeleted(id,false,false);
 		if(inReplyTo!=null){
 			inReplyTo.getReplies().add(tweet);
@@ -93,8 +97,9 @@ public class TweetService {
 		input.setContent("");
 		Tweet repost;
 		if(tweet!=null && user!=null){
-			repost = new TweetCreator(input, uR).createTweet();
+			repost = tC.createTweet(input);
 			repost.setRepostOf(tweet);
+			tR.saveAndFlush(repost);
 			return tM.tweetToTweetDto(repost);
 		}
 		return null;
@@ -126,9 +131,24 @@ public class TweetService {
 	public List<TweetDto> getRepsots(Integer id) {		//!
 		Tweet tweet = tR.findByIdAndDeletedAndAuthorDeleted(id, false,false);
 		if(tweet!=null){
+			System.out.println("LOLOLOLOLOLOL");
 			return tM.tweetsToTweetDtos(tR.findByRepostOf(tweet));
 		}
 		return null;
+	}
+	
+	public List<UserDto> getMantions(Integer id) {
+		Tweet tweet = tR.findByIdAndDeletedAndAuthorDeleted(id, false, false);
+		List<Users> res = new ArrayList<>();
+		if(tweet!=null){
+			for(Mention x : tweet.getMentions()){
+				Users user = uR.findByUsernameAndDeleted(x.getMention().substring(0), false);
+				if(user!=null){
+					res.add(user);
+				}
+			}
+		}
+		return uM.usersToUsersDto(res);
 	}
 	
 	
@@ -139,14 +159,5 @@ public class TweetService {
 
 	
 
-
-	
-
-
-	
-
-
-	
-	
 	
 }

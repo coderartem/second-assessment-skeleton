@@ -29,5 +29,10 @@ public class ValidateController {
 	public boolean nameAvailable(@PathVariable String username){
 		return vS.nameAvailable(username);
 	}
+	
+	@GetMapping("tag/exists/{label}")
+	public boolean tagExists(@PathVariable String tag){
+		return vS.tagExists(tag);
+	}
 
 }

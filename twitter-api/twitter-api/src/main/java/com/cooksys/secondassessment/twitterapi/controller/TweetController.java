@@ -79,5 +79,10 @@ public class TweetController {
 	public List<TweetDto> getReposts(@PathVariable Integer id){
 		return tS.getRepsots(id);
 	}
+	
+	@GetMapping("{id}/mentions")
+	public List<UserDto> getMentions(@PathVariable Integer id){
+		return tS.getMantions(id);
+	}
 
 }

@@ -137,6 +137,12 @@ public class UserService {
 	public List<UserDto> myFanClub(String username) {
 		return uM.usersToUsersDto(userRepository.findByUsername(username).getFollowers());
 	}
+
+
+	public List<TweetDto> whereUserMentioned(String username) {
+		tR.findByMentionsIn(username);
+		return null;
+	}
 	
 	
 	

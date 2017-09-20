@@ -78,8 +78,11 @@ public class UserController {
 		return userSrvice.getTweets(username);
 	}
 	
-//	@GetMapping("@{username}/mentions")
-//	
+	@GetMapping("@{username}/mentions")
+	public List<TweetDto> getTweetsWithUserMentioned(@PathVariable String username){
+		return userSrvice.whereUserMentioned(username);
+	}
+	
 	@GetMapping("@{username}/followers")
 	public List<UserDto> myFanClub(@PathVariable String username){
 		return userSrvice.myFanClub(username);
