@@ -47,5 +47,10 @@ public class TweetController {
 	public TweetDto deleteThisCrap(@PathVariable Integer id, @RequestBody Credentials cred){
 		return tS.deleteThisCrap(id,cred);
 	}
+	
+	@PostMapping("{id}/like")
+	public void like(@PathVariable Integer id, @RequestBody Credentials cred){
+		tS.like(id, cred);
+	}
 
 }

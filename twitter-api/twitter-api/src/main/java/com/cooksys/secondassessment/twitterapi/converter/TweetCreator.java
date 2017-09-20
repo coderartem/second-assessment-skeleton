@@ -22,6 +22,7 @@ public class TweetCreator {
 		tweet.setAuthor(uR.findByCredentials(tweetIn.getCredentials()));  //Null check needed
 		tweet.setPosted(new Timestamp(System.currentTimeMillis()).getTime());
 		tweet.setContent(tweetIn.getContent());
+		tweet.setDeleted(false);
 		
 		return tweet;
 	}

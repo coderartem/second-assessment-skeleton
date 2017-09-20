@@ -20,17 +20,14 @@ public class TweetService {
 	
 	private TweetMapper tM;
 	private UserRepository uR;
-
-	public TweetService(TweetMapper tM,  UserRepository uR) {
-		this.tM = tM;
-		this.uR = uR;
-	}
-
 	private TweetRepository tR;
 
-	public TweetService(TweetRepository tR) {
+	public TweetService(TweetMapper tM,  UserRepository uR, TweetRepository tR) {
+		this.tM = tM;
+		this.uR = uR;
 		this.tR = tR;
 	}
+
 
 	public List<TweetDto> getAll() {
 		return tM.tweetsToTweetDtos(tR.findByDeleted(false));
@@ -55,6 +52,15 @@ public class TweetService {
 			return tM.tweetToTweetDto(tweet);
 		}
 		return null;
+	}
+
+	@Transactional
+	public void like(Integer id, Credentials cred) {
+		Tweet tweet = tR.findOne(id);
+		if(tweet!=null && !tweet.isDeleted()){
+			
+		}
+		
 	}
 	
 	
