@@ -14,8 +14,8 @@ public class TweetDto {
 	private Long posted;
 	private String content;
 	
-	private TweetDto inReplayTo;
-	//private Tweet repostOf;
+	private TweetDto inReplyTo;
+	private TweetDto repostOf;
 	
 	
 	public Integer getId() {
@@ -42,11 +42,17 @@ public class TweetDto {
 	public void setContent(String content) {
 		this.content = content;
 	}
-	public TweetDto getInReplayTo() {
-		return inReplayTo;
+	public TweetDto getInReplyTo() {
+		return inReplyTo;
 	}
-	public void setInReplayTo(TweetDto inReplayTo) {
-		this.inReplayTo = inReplayTo;
+	public void setInReplyTo(TweetDto inReplyTo) {
+		this.inReplyTo = inReplyTo;
+	}
+	public TweetDto getRepostOf() {
+		return repostOf;
+	}
+	public void setRepostOf(TweetDto repostOf) {
+		this.repostOf = repostOf;
 	}
 	
 

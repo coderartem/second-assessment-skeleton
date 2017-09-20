@@ -33,10 +33,8 @@ public class Users {
 	@ManyToMany
 	private List<Users> following;
 	
-	@OneToMany
-	private List<Tweet> postedTweets;
-	
-	
+	@ManyToMany
+	private List<Tweet> liked;
 	
 	
 	
@@ -88,12 +86,13 @@ public class Users {
 	public void setFollowing(List<Users> following) {
 		this.following = following;
 	}
-	public List<Tweet> getPostedTweets() {
-		return postedTweets;
+	public List<Tweet> getLiked() {
+		return liked;
 	}
-	public void setPostedTweets(List<Tweet> postedTweets) {
-		this.postedTweets = postedTweets;
+	public void setLiked(List<Tweet> liked) {
+		this.liked = liked;
 	}
+	
 	
 	
 	@Override

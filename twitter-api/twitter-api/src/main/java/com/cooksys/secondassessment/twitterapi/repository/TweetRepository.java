@@ -9,7 +9,11 @@ import com.cooksys.secondassessment.twitterapi.entity.Tweet;
 
 public interface TweetRepository extends JpaRepository<Tweet,Integer> {
 
-	List<Tweet> findByDeleted(Boolean deleted);
-	Tweet findByAuthorCredentialsAndId(Credentials cred, Integer id);
 	
+	Tweet findByIdAndDeletedAndAuthorDeleted(Integer id, Boolean tweetDeleted, Boolean authorDeleted);
+	List<Tweet> findByDeleted(Boolean deleted);
+	Tweet findByAuthorCredentialsAndIdAndDeletedAndAuthorDeleted(Credentials cred, Integer id, Boolean tweetDeleted, Boolean authorDeleted);
+	List<Tweet> findByAuthorUsernameAndDeleted(String username, Boolean deleted);
+	List<Tweet> findByRepostOf(Tweet tweet);
+	List<Tweet> findByInReplyTo(Tweet tweet);
 }

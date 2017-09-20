@@ -1,5 +1,7 @@
 package com.cooksys.secondassessment.twitterapi.repository;
 
+import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.cooksys.secondassessment.twitterapi.entity.Credentials;
@@ -10,4 +12,7 @@ public interface UserRepository extends JpaRepository<Users,Integer> {
 	Users findByUsernameAndDeleted(String username, Boolean deleted);
 	Users findByUsername(String username);
 	Users findByCredentials(Credentials cred);
+	Users findByCredentialsAndDeleted(Credentials cred, Boolean deleted);
+	List<Users> findByUsernameAndFollowingDeleted (String username,Boolean deleted);
+	List<Users> findByDeletedAndLikedId(Boolean deleted, Integer id);
 }

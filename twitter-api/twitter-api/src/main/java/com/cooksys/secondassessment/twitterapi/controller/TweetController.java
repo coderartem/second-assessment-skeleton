@@ -11,7 +11,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.cooksys.secondassessment.twitterapi.dto.TweetDto;
+import com.cooksys.secondassessment.twitterapi.dto.UserDto;
 import com.cooksys.secondassessment.twitterapi.entity.Credentials;
+import com.cooksys.secondassessment.twitterapi.entity.Users;
 import com.cooksys.secondassessment.twitterapi.input.dto.TweetInput;
 import com.cooksys.secondassessment.twitterapi.service.TweetService;
 
@@ -56,6 +58,26 @@ public class TweetController {
 	@PostMapping("{id}/reply")
 	public TweetDto reply(@PathVariable Integer id, @RequestBody TweetInput tweetIn){
 		return tS.reply(id, tweetIn);
+	}
+	
+	@PostMapping("{id}/repost")
+	public TweetDto repost(@PathVariable Integer id, @RequestBody Credentials cred){
+		return tS.repost(id, cred);
+	}
+	
+	@GetMapping("{id}/likes")
+	public List<UserDto> getTweetLikers(@PathVariable Integer id){
+		return tS.getTweetLikers(id);
+	}
+	
+	@GetMapping("{id}/replies")
+	public List<TweetDto> getReplies(@PathVariable Integer id){
+		return tS.getReplies(id);
+	}
+	
+	@GetMapping("{id}/reposts")
+	public List<TweetDto> getReposts(@PathVariable Integer id){
+		return tS.getRepsots(id);
 	}
 
 }

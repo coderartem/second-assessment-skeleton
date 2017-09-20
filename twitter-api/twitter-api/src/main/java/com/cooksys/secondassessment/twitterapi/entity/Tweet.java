@@ -25,16 +25,19 @@ public class Tweet {
 	private boolean deleted;
 	
 	@ManyToMany
-	private List<Users> likedBy;
+	private List<Users> likedBy;  //Dvuhstoronka, hz esli budet rabotat', mozhno ot odnoj storony izbavitsya
 	
 	@OneToMany   //HZ?  //Do dobavleniya etogo i nizhe mapper rabotal
 	private List<Tweet> replies;
 	
-	
+	@ManyToOne
 	private Tweet inReplyTo;
 	
-//	private Tweet repostOf;
+	@ManyToOne
+	private Tweet repostOf;
 
+	
+	
 	public Integer getId() {
 		return id;
 	}
@@ -93,6 +96,14 @@ public class Tweet {
 	}
 	public void setInReplyTo(Tweet inReplyTo) {
 		this.inReplyTo = inReplyTo;
+	}
+
+	public Tweet getRepostOf() {
+		return repostOf;
+	}
+
+	public void setRepostOf(Tweet repostOf) {
+		this.repostOf = repostOf;
 	}
 
 	@Override

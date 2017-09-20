@@ -1,5 +1,6 @@
 package com.cooksys.secondassessment.twitterapi.service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -11,9 +12,11 @@ import com.cooksys.secondassessment.twitterapi.converter.ConvertInput;
 import com.cooksys.secondassessment.twitterapi.dto.TweetDto;
 import com.cooksys.secondassessment.twitterapi.dto.UserDto;
 import com.cooksys.secondassessment.twitterapi.entity.Credentials;
+import com.cooksys.secondassessment.twitterapi.entity.Tweet;
 import com.cooksys.secondassessment.twitterapi.entity.Users;
 import com.cooksys.secondassessment.twitterapi.input.dto.InputDto;
 import com.cooksys.secondassessment.twitterapi.mapper.UserMapper;
+import com.cooksys.secondassessment.twitterapi.repository.TweetRepository;
 import com.cooksys.secondassessment.twitterapi.repository.UserRepository;
 
 @Service
@@ -22,11 +25,15 @@ public class UserService {
 	private UserRepository userRepository;
 	private UserMapper uM;
 	private EntityManager eM;   //Vozmozhno ne nuzhen
+	private TweetRepository tR;
+	private TweetService tS;
 
-	public UserService(UserRepository userRepository, UserMapper uM, EntityManager eM) {
+	public UserService(UserRepository userRepository, UserMapper uM, EntityManager eM, TweetRepository tR, TweetService tS) {
 		this.userRepository=userRepository;
 		this.uM = uM;
 		this.eM = eM;
+		this.tR = tR;
+		this.tS = tS;
 	}
 	
 	
@@ -97,8 +104,28 @@ public class UserService {
 
 
 	public List<TweetDto> getFeed(String username) {
-		// TODO Auto-generated method stub
+
+		Users user = userRepository.findByUsername(username);
+		List<TweetDto> res=new ArrayList<>();					//Mogut byt dublikaty tweetov !!!
+		if(user!=null && !user.isDeleted()){					//Need sorting
+			res.addAll(getTweets(username));						
+			List<Users> following = userRepository.findByUsernameAndFollowingDeleted(username, false);
+			for(Users x : following){
+				res.addAll(tS.authorTweets(x.getUsername()));
+			}
+		}
+		
 		return null;
+	}
+	
+	public List<TweetDto> getTweets(String username){				//Still need to sort
+		Users user = userRepository.findByUsername(username);
+		if(user!=null && !user.isDeleted()){ 
+			
+			return  tS.authorTweets(username);
+		}
+		return new ArrayList<TweetDto>();
+		
 	}
 
 
