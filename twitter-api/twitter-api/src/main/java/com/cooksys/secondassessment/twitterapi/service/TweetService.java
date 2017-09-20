@@ -55,12 +55,28 @@ public class TweetService {
 	}
 
 	@Transactional
-	public void like(Integer id, Credentials cred) {
+	public int like(Integer id, Credentials cred) {
 		Tweet tweet = tR.findOne(id);
-		if(tweet!=null && !tweet.isDeleted()){
-			
+		Users user = uR.findByCredentials(cred);
+		if(tweet!=null && user!=null && !tweet.isDeleted() && !user.isDeleted()){
+				tweet.getLikedBy().add(user);
+				return 1;
+		}
+		return 0;
+		
+	}
+
+
+	public TweetDto reply(Integer id, TweetInput tweetIn) {
+		Tweet tweet = new TweetCreator(tweetIn, uR).createTweet();  //Zamenit' na Mapper
+		Tweet inReplyTo = tR.findOne(id);
+		if(inReplyTo!=null){
+			inReplyTo.getReplies().add(tweet);
+			tweet.setInReplyTo(inReplyTo);
+			return tM.tweetToTweetDto(tweet);
 		}
 		
+		return null;
 	}
 	
 	

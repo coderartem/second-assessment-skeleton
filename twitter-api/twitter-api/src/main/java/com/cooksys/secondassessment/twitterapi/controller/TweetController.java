@@ -52,5 +52,10 @@ public class TweetController {
 	public void like(@PathVariable Integer id, @RequestBody Credentials cred){
 		tS.like(id, cred);
 	}
+	
+	@PostMapping("{id}/reply")
+	public TweetDto reply(@PathVariable Integer id, @RequestBody TweetInput tweetIn){
+		return tS.reply(id, tweetIn);
+	}
 
 }

@@ -10,12 +10,12 @@ public class TweetDto {
 	
 	
 	private Integer id;
-	private Users author;
+	private UserDto author;  //Spring is smart as heck, mapper convert type to typeDto itself
 	private Long posted;
 	private String content;
 	
-//	private InReplyToDto inReplayTo;
-//	private Tweet repostOf;
+	private TweetDto inReplayTo;
+	//private Tweet repostOf;
 	
 	
 	public Integer getId() {
@@ -24,10 +24,10 @@ public class TweetDto {
 	public void setId(Integer id) {
 		this.id = id;
 	}
-	public Users getAuthor() {
+	public UserDto getAuthor() {
 		return author;
 	}
-	public void setAuthor(Users author) {
+	public void setAuthor(UserDto author) {
 		this.author = author;
 	}
 	public Long getPosted() {
@@ -42,5 +42,12 @@ public class TweetDto {
 	public void setContent(String content) {
 		this.content = content;
 	}
+	public TweetDto getInReplayTo() {
+		return inReplayTo;
+	}
+	public void setInReplayTo(TweetDto inReplayTo) {
+		this.inReplayTo = inReplayTo;
+	}
+	
 
 }

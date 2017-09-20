@@ -8,6 +8,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 
 @Entity
 public class Tweet {
@@ -23,12 +24,15 @@ public class Tweet {
 	
 	private boolean deleted;
 	
-//	@ManyToMany
-//	private List<Users> likedBy;
+	@ManyToMany
+	private List<Users> likedBy;
+	
+	@OneToMany   //HZ?  //Do dobavleniya etogo i nizhe mapper rabotal
+	private List<Tweet> replies;
 	
 	
-//	private Tweet inReplayTo;
-//	
+	private Tweet inReplyTo;
+	
 //	private Tweet repostOf;
 
 	public Integer getId() {
@@ -71,13 +75,25 @@ public class Tweet {
 		this.deleted = deleted;
 	}
 
-//	public List<Users> getLikedBy() {
-//		return likedBy;
-//	}
-//
-//	public void setLikedBy(List<Users> likedBy) {
-//		this.likedBy = likedBy;
-//	}
+	public List<Users> getLikedBy() {
+		return likedBy;
+	}
+
+	public void setLikedBy(List<Users> likedBy) {
+		this.likedBy = likedBy;
+	}
+	public List<Tweet> getReplies() {
+		return replies;
+	}
+	public void setReplies(List<Tweet> replies) {
+		this.replies = replies;
+	}
+	public Tweet getInReplyTo() {
+		return inReplyTo;
+	}
+	public void setInReplyTo(Tweet inReplyTo) {
+		this.inReplyTo = inReplyTo;
+	}
 
 	@Override
 	public int hashCode() {

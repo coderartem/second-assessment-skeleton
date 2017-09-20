@@ -41,7 +41,7 @@ public class UserService {
 	}
 
 	public List<UserDto> getAllUsers() {
-		return uM.usersToUsersDto(userRepository.findAll());
+		return uM.usersToUsersDto(userRepository.findAll());  ///Adjust to unDeleted only
 	}
 
 
