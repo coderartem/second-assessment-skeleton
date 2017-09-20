@@ -5,15 +5,15 @@ import javax.persistence.Embeddable;
 @Embeddable
 public class Credentials {
 	
-	private String username;
+	private String usernam;
 	private String password;
 	
 	
-	public String getUsername() {
-		return username;
+	public String getUsernam() {
+		return usernam;
 	}
-	public void setUsername(String username) {
-		this.username = username;
+	public void setUsernam(String username) {
+		this.usernam = username;
 	}
 	public String getPassword() {
 		return password;

@@ -21,10 +21,10 @@ public class UserDto {
 	public void setProfile(Profile profile) {
 		this.profile = profile;
 	}
-	public Long getTimestamp() {
+	public Long getJoined() {
 		return joined;
 	}
-	public void setTimestamp(Long joined) {
+	public void setJoined(Long joined) {
 		this.joined = joined;
 	}
 

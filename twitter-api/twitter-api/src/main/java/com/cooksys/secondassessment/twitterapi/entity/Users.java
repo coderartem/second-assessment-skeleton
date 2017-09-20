@@ -1,9 +1,16 @@
 package com.cooksys.secondassessment.twitterapi.entity;
 
+import java.util.List;
+
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+
+import com.cooksys.secondassessment.twitterapi.dto.UserDto;
 
 @Entity
 public class Users {
@@ -17,6 +24,14 @@ public class Users {
 	@Embedded
 	private Credentials credentials;
 	private Long joined;
+	
+	private boolean deleted;
+	
+	@ManyToMany
+	private List<Users> followers;
+	
+	@ManyToMany
+	private List<Users> following;
 	
 	
 	
@@ -51,6 +66,26 @@ public class Users {
 	public void setCredentials(Credentials credentials) {
 		this.credentials = credentials;
 	}
+	
+	public boolean isDeleted() {
+		return deleted;
+	}
+	public void setDeleted(boolean deleted) {
+		this.deleted = deleted;
+	}
+	public List<Users> getFollowers() {
+		return followers;
+	}
+	public void setFollowers(List<Users> followers) {
+		this.followers = followers;
+	}
+	public List<Users> getFollowing() {
+		return following;
+	}
+	public void setFollowing(List<Users> following) {
+		this.following = following;
+	}
+	
 	
 	@Override
 	public int hashCode() {
