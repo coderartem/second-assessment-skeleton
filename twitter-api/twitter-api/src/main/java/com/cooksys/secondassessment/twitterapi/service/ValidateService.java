@@ -29,8 +29,8 @@ public class ValidateService {
 		return user!=null?user.isDeleted():true;
 	}
 
-	public boolean tagExists(String tag) {
-		return hR.findByLabel(tag)!=null?true:false;
+	public boolean tagExists(String label) {
+		return hR.findByLabel(label)!=null?true:false;
 	}
 
 	

@@ -17,6 +17,7 @@ public interface UserRepository extends JpaRepository<Users,Integer> {
 	List<Users> findByUsernameAndFollowingDeleted (String username,Boolean deleted);
 	List<Users> findByDeletedAndLikedId(Boolean deleted, Integer id);  //Works good
 	Users findByUsernameAndFollowersCredentials(String username, Credentials cred);
-	List<Users> findByUsernameAndDeletedAndFollowingDeleted(String username, Boolean deleted, Boolean followDeleted);
-	List<Users> findByUsernameAndDeletedAndFollowersDeleted(String username, boolean b, boolean c);
+//	List<Users> findByUsernameAndDeletedAndFollowingDeleted(String username, Boolean deleted, Boolean followDeleted);
+//	List<Users> findByUsernameAndDeletedAndFollowersDeleted(String username, boolean b, boolean c);
+	List<Users> findByUsernameInAndDeleted(List<String> usernames, Boolean deleted);
 }

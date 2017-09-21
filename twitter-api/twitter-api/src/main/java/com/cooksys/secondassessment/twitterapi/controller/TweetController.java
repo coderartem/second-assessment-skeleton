@@ -82,7 +82,7 @@ public class TweetController {
 	
 	@GetMapping("{id}/mentions")
 	public List<UserDto> getMentions(@PathVariable Integer id){
-		return tS.getMantions(id);
+		return tS.getMentions(id);
 	}
 
 }

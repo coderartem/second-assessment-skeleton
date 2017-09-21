@@ -42,9 +42,11 @@ public class TweetService {
 	}
 
 	public TweetDto postTweet(TweetInput tweetInput) {
-		Tweet tweet = tC.createTweet(tweetInput);   //Zamenit' na Mapper
-		tR.save(tweet);
+		if(uR.findByCredentialsAndDeleted(tweetInput.getCredentials(), false)!=null){
+			Tweet tweet = tC.createTweet(tweetInput);   
+			tR.save(tweet);
 		return tM.tweetToTweetDto(tweet);
+		}return null;
 	}
 
 	public TweetDto getThatTweet(Integer id) {		//!
@@ -76,10 +78,12 @@ public class TweetService {
 
 	@Transactional
 	public TweetDto reply(Integer id, TweetInput tweetIn) {
-		Tweet tweet = tC.createTweet(tweetIn);  //Zamenit' na Mapper
-		tR.saveAndFlush(tweet);
+		if(uR.findByCredentialsAndDeleted(tweetIn.getCredentials(), false)==null) return null;
+		Tweet tweet;
 		Tweet inReplyTo = tR.findByIdAndDeletedAndAuthorDeleted(id,false,false);
 		if(inReplyTo!=null){
+			tweet = tC.createTweet(tweetIn);
+			tR.saveAndFlush(tweet);
 			inReplyTo.getReplies().add(tweet);
 			tweet.setInReplyTo(inReplyTo);
 			return tM.tweetToTweetDto(tweet);
@@ -131,24 +135,19 @@ public class TweetService {
 	public List<TweetDto> getRepsots(Integer id) {		//!
 		Tweet tweet = tR.findByIdAndDeletedAndAuthorDeleted(id, false,false);
 		if(tweet!=null){
-			System.out.println("LOLOLOLOLOLOL");
 			return tM.tweetsToTweetDtos(tR.findByRepostOf(tweet));
 		}
 		return null;
 	}
 	
-	public List<UserDto> getMantions(Integer id) {
+	public List<UserDto> getMentions(Integer id) {
 		Tweet tweet = tR.findByIdAndDeletedAndAuthorDeleted(id, false, false);
-		List<Users> res = new ArrayList<>();
-		if(tweet!=null){
-			for(Mention x : tweet.getMentions()){
-				Users user = uR.findByUsernameAndDeleted(x.getMention().substring(0), false);
-				if(user!=null){
-					res.add(user);
-				}
-			}
-		}
-		return uM.usersToUsersDto(res);
+		if(tweet==null) return null;
+		List<String> usernames = new ArrayList<>();			//Ugly !!!!!!!!!!
+		for(Mention x : tweet.getMentions()){
+			usernames.add(x.getMention().substring(1));
+		}		
+		return uM.usersToUsersDto(uR.findByUsernameInAndDeleted(usernames, false));
 	}
 	
 	

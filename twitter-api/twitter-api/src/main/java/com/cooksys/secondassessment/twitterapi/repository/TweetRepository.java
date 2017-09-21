@@ -17,4 +17,5 @@ public interface TweetRepository extends JpaRepository<Tweet,Integer> {
 	List<Tweet> findByRepostOf(Tweet tweet);
 	List<Tweet> findByInReplyTo(Tweet tweet);
 	List<Tweet> findByMentionsIn(String username);
-}
+	List<Tweet> findByDeletedAndHashtagLabel (Boolean deleted, String label);
+	List<Tweet> findByDeletedAndMentionsMention (Boolean deleted, String mention);}

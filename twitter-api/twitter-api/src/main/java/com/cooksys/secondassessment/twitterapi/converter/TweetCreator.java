@@ -1,6 +1,8 @@
 package com.cooksys.secondassessment.twitterapi.converter;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -33,37 +35,48 @@ public class TweetCreator {
 	
 	public Tweet createTweet(TweetInput tweetIn){
 			Tweet tweet = new Tweet();
-			
-			tweet.setAuthor(uR.findByCredentials(tweetIn.getCredentials()));  //Null check needed
+			if(uR.findByCredentialsAndDeleted(tweetIn.getCredentials(), false)==null) return null;
+			tweet.setAuthor(uR.findByCredentials(tweetIn.getCredentials())); 
 			tweet.setPosted(new Timestamp(System.currentTimeMillis()).getTime());
 			tweet.setContent(tweetIn.getContent());
 			tweet.setDeleted(false);
 			
 			Matcher hashTag = Pattern.compile("#(\\w+)").matcher(tweetIn.getContent());
+			List<Hashtag> hL = new ArrayList<>();
 			while(hashTag.find()){
-				
-				Hashtag hstg = hR.findByLabel(hashTag.toString());
+				Hashtag hstg = hR.findByLabel(hashTag.group());
 				if(hstg!=null){
-					tweet.getHashtag().add(hstg);
+					hstg.setLastUsed(new Timestamp(System.currentTimeMillis()).getTime());
+					hL.add(hstg);
 				}else{
-					Hashtag hshtg = new Hashtag(hashTag.toString());
+					
+					Hashtag hshtg = new Hashtag();
+					hshtg.setLabel(hashTag.group());
+					hshtg.setLastUsed(hshtg.getFirstUsed());
 					hR.saveAndFlush(hshtg);
-					tweet.getHashtag().add(hshtg);		//HZ dolzhen li ya vmesto etogo dobavit' cherez poisk v DB?
+					hL.add(hshtg);
+					System.out.println("And getHashtag");
+							//HZ dolzhen li ya vmesto etogo dobavit' cherez poisk v DB?
 				}
 			}
+			tweet.setHashtag(hL);
+			
+			List<Mention> mL = new ArrayList<>();
 			Matcher mention = Pattern.compile("@(\\w+)").matcher(tweetIn.getContent());
 			while(mention.find()){
 				
-				Mention mn = mR.findByMention(mention.toString());
+				Mention mn = mR.findByMention(mention.group());
 				if(mn!=null){
-					tweet.getMentions().add(mn);
+					mL.add(mn);
 				}else{
 					Mention men = new Mention();
-					men.setMention(mention.toString());
+					men.setMention(mention.group());
 					mR.saveAndFlush(men);
-					tweet.getMentions().add(men);
+					mL.add(men);
 				}
 			}
+			
+			tweet.setMentions(mL);
 		
 		return tweet;
 	}

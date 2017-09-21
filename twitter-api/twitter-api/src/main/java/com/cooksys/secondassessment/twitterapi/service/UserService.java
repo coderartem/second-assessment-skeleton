@@ -15,6 +15,7 @@ import com.cooksys.secondassessment.twitterapi.entity.Credentials;
 import com.cooksys.secondassessment.twitterapi.entity.Tweet;
 import com.cooksys.secondassessment.twitterapi.entity.Users;
 import com.cooksys.secondassessment.twitterapi.input.dto.InputDto;
+import com.cooksys.secondassessment.twitterapi.mapper.TweetMapper;
 import com.cooksys.secondassessment.twitterapi.mapper.UserMapper;
 import com.cooksys.secondassessment.twitterapi.repository.TweetRepository;
 import com.cooksys.secondassessment.twitterapi.repository.UserRepository;
@@ -28,14 +29,16 @@ public class UserService {
 	private TweetRepository tR;
 	private TweetService tS;
 	private ConvertInput cI;
+	private TweetMapper tM;
 
-	public UserService(UserRepository userRepository, UserMapper uM, EntityManager eM, TweetRepository tR, TweetService tS, ConvertInput cI) {
+	public UserService(UserRepository userRepository, UserMapper uM, EntityManager eM, TweetRepository tR, TweetService tS, ConvertInput cI, TweetMapper tM) {
 		this.uR=userRepository;
 		this.uM = uM;
 		this.eM = eM;
 		this.tR = tR;
 		this.tS = tS;
 		this.cI = cI;
+		this.tM = tM;
 	}
 	
 	
@@ -105,12 +108,11 @@ public class UserService {
 
 	public List<TweetDto> getFeed(String username) {
 
-		Users user = uR.findByUsername(username);
+		Users user = uR.findByUsername(username);				//Adjust  
 		List<TweetDto> res=new ArrayList<>();					//Mogut byt dublikaty tweetov !!!
 		if(user!=null && !user.isDeleted()){					//Need sorting
-			res.addAll(getTweets(username));						
-			List<Users> following = uR.findByUsernameAndFollowingDeleted(username, false);
-			for(Users x : following){
+			res.addAll(getTweets(username));
+			for(Users x : user.getFollowing()){
 				res.addAll(tS.authorTweets(x.getUsername()));
 			}
 			return res;
@@ -144,8 +146,7 @@ public class UserService {
 
 
 	public List<TweetDto> whereUserMentioned(String username) {
-		tR.findByMentionsIn(username);
-		return null;
+		return tM.tweetsToTweetDtos(tR.findByDeletedAndMentionsMention(false, "@"+username));
 	}
 	
 	

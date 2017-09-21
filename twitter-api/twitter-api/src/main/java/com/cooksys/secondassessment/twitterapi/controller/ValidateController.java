@@ -31,8 +31,8 @@ public class ValidateController {
 	}
 	
 	@GetMapping("tag/exists/{label}")
-	public boolean tagExists(@PathVariable String tag){
-		return vS.tagExists(tag);
+	public boolean tagExists(@PathVariable String label){
+		return vS.tagExists(label);
 	}
 
 }
