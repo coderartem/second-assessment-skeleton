@@ -84,6 +84,9 @@ public class TweetFactory {
 			if(existingMention!=null){
 				mentionsList.add(existingMention);
 			}else{
+				if(userRepository.findByUsernameAndDeleted(mention.group().substring(1), false)==null){
+					continue;
+				}
 				Mention newMention = new Mention();
 				newMention.setMention(mention.group());
 				mentionRepsoitory.saveAndFlush(newMention);

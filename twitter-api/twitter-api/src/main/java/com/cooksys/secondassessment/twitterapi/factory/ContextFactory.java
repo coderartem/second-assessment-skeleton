@@ -24,35 +24,36 @@ public class ContextFactory {
 		this.tM = tM;
 	}
 
-	List<Tweet> before = new ArrayList<>();
-	List<Tweet> after = new ArrayList<>();
+	List<Tweet> beforeList = new ArrayList<>();
+	List<Tweet> afterList = new ArrayList<>();
 	public Context getContext(Integer id){
 		
 		Tweet tweet = tR.findByIdAndDeletedAndAuthorDeleted(id, false, false);
 		if(tweet==null) return null;
 		before(tweet);
 		after(tweet);
-
-		return new Context(tM.tweetsToTweetDtos(before), tM.tweetToTweetDto(tweet), tM.tweetsToTweetDtos(after));
 		
+		beforeList.removeIf(b->b.equals(tweet));
+		afterList.removeIf(a->a.equals(tweet));
+
+		return new Context(tM.tweetsToTweetDtos(beforeList), tM.tweetToTweetDto(tweet), tM.tweetsToTweetDtos(afterList));
 	}
-	//nado izbavitsya ot dublikatov
 	
 	public List<Tweet> before(Tweet tweet){
-		before.add(tweet);
+		beforeList.add(tweet);
 		if(tweet.getInReplyTo()==null){
-			return before;
+			return beforeList;
 		}
 		return before(tweet.getInReplyTo());
 	}
 	
 	public List<Tweet> after(Tweet tweet){
-		after.add(tweet);
+		afterList.add(tweet);
 		if(tweet.getReplies()!=null){
 			for(Tweet t : tweet.getReplies()){
 				after(t);
 			}
 		}
-		return after;
+		return afterList;
 	}
 }

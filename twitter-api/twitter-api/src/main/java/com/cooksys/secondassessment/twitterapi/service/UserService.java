@@ -110,14 +110,18 @@ public class UserService {
 	}
 
 	public List<UserDto> whoAmIFollowing(String username) {
-		List<Users> following = userRepository.findByUsernameAndDeleted(username, false).getFollowing();
+		Users user = userRepository.findByUsernameAndDeleted(username, false);
+		if(user==null)return null;
+		List<Users> following = user.getFollowing();
 		following.removeIf(t->t.isDeleted()==true);
 		return userMapper.usersToUsersDto(following);
 	}
 
 
 	public List<UserDto> myFanClub(String username) {
-		List<Users> followers = userRepository.findByUsernameAndDeleted(username, false).getFollowers();
+		Users user = userRepository.findByUsernameAndDeleted(username, false);
+		if(user==null)return null;
+		List<Users> followers = user.getFollowers();
 		followers.removeIf(t->t.isDeleted()==true);
 		return userMapper.usersToUsersDto(followers);
 	}

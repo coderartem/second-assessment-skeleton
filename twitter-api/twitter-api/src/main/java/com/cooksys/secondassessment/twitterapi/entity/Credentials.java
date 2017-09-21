@@ -1,5 +1,6 @@
 package com.cooksys.secondassessment.twitterapi.entity;
 
+import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.validation.constraints.NotNull;
 
@@ -7,16 +8,17 @@ import javax.validation.constraints.NotNull;
 public class Credentials {
 	
 	@NotNull
-	private String usernam;
+	@Column(name="login")
+	private String username;
 	@NotNull
 	private String password;
 	
 	
-	public String getUsernam() {
-		return usernam;
+	public String getUsername() {
+		return username;
 	}
-	public void setUsernam(String username) {
-		this.usernam = username;
+	public void setUsername(String username) {
+		this.username = username;
 	}
 	public String getPassword() {
 		return password;

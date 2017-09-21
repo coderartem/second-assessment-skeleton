@@ -27,20 +27,24 @@ public class UserFactory {
 	public Users createUser(InputDto input){
 		
 		if(userRepository.findByCredentialsAndDeleted(input.getCredentials(),true)!=null){
-			Users user = reactivateUser(input.getCredentials().getUsernam());
+			Users user = reactivateUser(input.getCredentials().getUsername());
 			userRepository.saveAndFlush(user);
 			return userRepository.findByCredentialsAndDeleted(input.getCredentials(), false);
 		}
-		if(userRepository.findByUsername(input.getCredentials().getUsernam())!=null){
+		if(userRepository.findByUsername(input.getCredentials().getUsername())!=null){
+			return null;
+		}
+		if(input.getCredentials().getPassword()==null || input.getCredentials().getUsername()==null || input.getProfile().getEmail()==null){
 			return null;
 		}
 			Users user = new Users();
-			user.setUsername(input.getCredentials().getUsernam());
+			user.setUsername(input.getCredentials().getUsername());
 			user.setProfile(input.getProfile());
 			user.setJoined(new Timestamp(System.currentTimeMillis()).getTime());
 			user.setCredentials(input.getCredentials());
 			user.setDeleted(false);
 			userRepository.saveAndFlush(user);
+			
 		return user;
 	}
 	
