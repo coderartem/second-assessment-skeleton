@@ -76,23 +76,19 @@ public class TweetService {
 	}
 
 	@Transactional
-	public TweetDto reply(Integer id, TweetInput tweetIn) {
-		if(userRepository.findByCredentialsAndDeleted(tweetIn.getCredentials(), false)==null) return null;
-		Tweet tweet;
+	public TweetDto reply(Integer id, TweetInput tweetInput) {
 		Tweet inReplyTo = tweetRepository.findByIdAndDeletedAndAuthorDeleted(id,false,false);
-		if(inReplyTo==null)return null;
-				tweet = tweetFactory.createTweet(tweetIn);
-				tweetRepository.saveAndFlush(tweet);
+		if(inReplyTo==null || userRepository.findByCredentialsAndDeleted(tweetInput.getCredentials(), false)==null)return null;
+		Tweet tweet = tweetFactory.createTweet(tweetInput);
 				inReplyTo.getReplies().add(tweet);
 				tweet.setInReplyTo(inReplyTo);
 			return tweetMapper.tweetToTweetDto(tweet);
 	}
 	
 	@Transactional
-	public TweetDto repost(Integer id, Credentials cred) {	
-		Users user = userRepository.findByCredentialsAndDeleted(cred, false);
+	public TweetDto repost(Integer id, Credentials cred) {
 		Tweet tweet = tweetRepository.findByIdAndDeletedAndAuthorDeleted(id, false,false);
-		if(tweet==null || user==null)return null;
+		if(tweet==null || userRepository.findByCredentialsAndDeleted(cred, false)==null) return null;
 				Tweet repost = tweetFactory.createRepostTweet(cred);
 				repost.setRepostOf(tweet);
 			return tweetMapper.tweetToTweetDto(repost);
@@ -121,10 +117,8 @@ public class TweetService {
 	public List<UserDto> getMentions(Integer id) {
 		Tweet tweet = tweetRepository.findByIdAndDeletedAndAuthorDeleted(id, false, false);
 		if(tweet==null) return null;
-		List<String> usernames = new ArrayList<>();			//Ugly !!!!!!!!!!
-		for(Mention x : tweet.getMentions()){
-			usernames.add(x.getMention().substring(1));
-		}		
+		List<String> usernames = new ArrayList<>();
+		tweet.getMentions().forEach(m -> usernames.add(m.getMention().substring(1)));
 		List<UserDto> userList = userMapper.usersToUsersDto(userRepository.findByUsernameInAndDeleted(usernames, false));
 		return userList!=null?sort.sortUsers(userList):null;
 	}

@@ -8,7 +8,6 @@ import org.springframework.transaction.annotation.Transactional;
 import com.cooksys.secondassessment.twitterapi.entity.Tweet;
 import com.cooksys.secondassessment.twitterapi.entity.Users;
 import com.cooksys.secondassessment.twitterapi.input.dto.InputDto;
-import com.cooksys.secondassessment.twitterapi.mapper.UserMapper;
 import com.cooksys.secondassessment.twitterapi.repository.TweetRepository;
 import com.cooksys.secondassessment.twitterapi.repository.UserRepository;
 

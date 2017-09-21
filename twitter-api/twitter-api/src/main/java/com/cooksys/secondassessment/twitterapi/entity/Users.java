@@ -7,10 +7,6 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-
-import com.cooksys.secondassessment.twitterapi.dto.UserDto;
 
 @Entity
 public class Users {

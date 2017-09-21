@@ -1,6 +1,5 @@
 package com.cooksys.secondassessment.twitterapi.dto;
 
-import com.cooksys.secondassessment.twitterapi.entity.Users;
 
 public class ReplyTweetDto {
 	

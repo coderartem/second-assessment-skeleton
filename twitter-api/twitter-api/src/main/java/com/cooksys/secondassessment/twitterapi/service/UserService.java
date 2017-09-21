@@ -3,15 +3,12 @@ package com.cooksys.secondassessment.twitterapi.service;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.persistence.EntityManager;
-
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.cooksys.secondassessment.twitterapi.dto.TweetDto;
 import com.cooksys.secondassessment.twitterapi.dto.UserDto;
 import com.cooksys.secondassessment.twitterapi.entity.Credentials;
-import com.cooksys.secondassessment.twitterapi.entity.Tweet;
 import com.cooksys.secondassessment.twitterapi.entity.Users;
 import com.cooksys.secondassessment.twitterapi.factory.Sorter;
 import com.cooksys.secondassessment.twitterapi.factory.UserFactory;
@@ -95,7 +92,6 @@ public class UserService {
 
 
 	public List<TweetDto> getFeed(String username) {
-
 		Users user = userRepository.findByUsernameAndDeleted(username, false);
 		List<TweetDto> res=new ArrayList<>();
 		if(user!=null){											
