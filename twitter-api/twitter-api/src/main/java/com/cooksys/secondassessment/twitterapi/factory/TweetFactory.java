@@ -54,6 +54,7 @@ public class TweetFactory {
 		return tweet;
 	}
 	
+	@Transactional
 	public List<Hashtag> tagsCheck(String content){
 		
 		Matcher hashTag = Pattern.compile("#(\\w+)").matcher(content);
@@ -72,6 +73,7 @@ public class TweetFactory {
 		return tagsList;
 	}
 	
+	@Transactional
 	public List<Mention> mentionsCheck(String content){
 		
 		Matcher mention = Pattern.compile("@(\\w+)").matcher(content);
@@ -101,5 +103,10 @@ public class TweetFactory {
 			return tweet;
 		}
 		return null;
+	}
+	
+	public Tweet createRepostTweet(Credentials cred){
+		TweetInput input = new TweetInput("",cred);
+		return  createTweet(input);
 	}
 }

@@ -15,28 +15,38 @@ import com.cooksys.secondassessment.twitterapi.repository.TweetRepository;
 public class ContextFactory {
 	
 	
-	private TweetRepository tR;
-	private TweetMapper tM;
+	private TweetRepository tweetRepository;
+	private TweetMapper tweetMapper;
+	private Sorter sort;
+	
+	private List<Tweet> beforeList = new ArrayList<>();
+	private List<Tweet> afterList = new ArrayList<>();
+	
 
 
-	public ContextFactory(TweetRepository tR, TweetMapper tM) {
-		this.tR = tR;
-		this.tM = tM;
+	public ContextFactory(TweetRepository tweetRepository, TweetMapper tweetMapper, Sorter sort) {
+		this.tweetRepository = tweetRepository;
+		this.tweetMapper = tweetMapper;
+		this.sort = sort;
 	}
 
-	List<Tweet> beforeList = new ArrayList<>();
-	List<Tweet> afterList = new ArrayList<>();
 	public Context getContext(Integer id){
 		
-		Tweet tweet = tR.findByIdAndDeletedAndAuthorDeleted(id, false, false);
+		beforeList.clear();
+		afterList.clear();
+		
+		Tweet tweet = tweetRepository.findByIdAndDeletedAndAuthorDeleted(id, false, false);
 		if(tweet==null) return null;
 		before(tweet);
 		after(tweet);
 		
 		beforeList.removeIf(b->b.equals(tweet));
+		beforeList.removeIf(b->b.isDeleted());
 		afterList.removeIf(a->a.equals(tweet));
+		afterList.removeIf(a->a.isDeleted());
 
-		return new Context(tM.tweetsToTweetDtos(beforeList), tM.tweetToTweetDto(tweet), tM.tweetsToTweetDtos(afterList));
+		return new Context(sort.sortTweets(tweetMapper.tweetsToTweetDtos(beforeList)), tweetMapper.tweetToTweetDto(tweet), 
+				sort.sortTweets(tweetMapper.tweetsToTweetDtos(afterList)));
 	}
 	
 	public List<Tweet> before(Tweet tweet){

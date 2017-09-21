@@ -96,9 +96,9 @@ public class UserService {
 
 	public List<TweetDto> getFeed(String username) {
 
-		Users user = userRepository.findByUsernameAndDeleted(username, false);				//Adjust  
-		List<TweetDto> res=new ArrayList<>();					//Mogut byt dublikaty tweetov !!!
-		if(user!=null){											//Need sorting
+		Users user = userRepository.findByUsernameAndDeleted(username, false);
+		List<TweetDto> res=new ArrayList<>();
+		if(user!=null){											
 			res.addAll(tweetService.authorTweets(username));
 			for(Users x : user.getFollowing()){
 				res.addAll(tweetService.authorTweets(x.getUsername()));
@@ -108,12 +108,10 @@ public class UserService {
 		return null;
 	}
 	
-	public List<TweetDto> getTweets(String username){				//Still need to sort
+	public List<TweetDto> getTweets(String username){
 		Users user = userRepository.findByUsernameAndDeleted(username, false);
-		if(user!=null){ 
+		if(user==null)return null; 
 			return  tweetService.authorTweets(username);
-		}
-		return null;
 	}
 
 	public List<UserDto> whoAmIFollowing(String username) {

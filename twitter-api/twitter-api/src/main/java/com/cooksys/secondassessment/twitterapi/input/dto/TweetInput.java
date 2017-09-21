@@ -7,6 +7,15 @@ public class TweetInput {
 	private String content;
 	private Credentials credentials;
 	
+	public TweetInput() {
+		// TODO Auto-generated constructor stub
+	}
+	
+	public TweetInput(String content,  Credentials credentials) {
+		this.content = content;
+		this.credentials = credentials;
+	}
+	
 	
 	public String getContent() {
 		return content;
