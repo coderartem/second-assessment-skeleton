@@ -2,8 +2,6 @@ package com.cooksys.secondassessment.twitterapi.service;
 
 import org.springframework.stereotype.Service;
 
-import com.cooksys.secondassessment.twitterapi.dto.UserDto;
-import com.cooksys.secondassessment.twitterapi.entity.Users;
 import com.cooksys.secondassessment.twitterapi.repository.HashTagRepository;
 import com.cooksys.secondassessment.twitterapi.repository.UserRepository;
 

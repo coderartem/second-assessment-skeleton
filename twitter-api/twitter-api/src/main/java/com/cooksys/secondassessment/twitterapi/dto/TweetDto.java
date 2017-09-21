@@ -1,11 +1,5 @@
 package com.cooksys.secondassessment.twitterapi.dto;
 
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-
-import com.cooksys.secondassessment.twitterapi.entity.Tweet;
-import com.cooksys.secondassessment.twitterapi.entity.Users;
-
 public class TweetDto {
 	
 	
