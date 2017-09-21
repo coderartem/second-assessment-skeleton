@@ -1,14 +1,20 @@
 package com.cooksys.secondassessment.twitterapi.dto;
 
-import com.cooksys.secondassessment.twitterapi.entity.Users;
 
 public class SimpleTweetDto {
 	
+	private Integer id;
 	private UserDto author;
 	private Long posted;
 	private String content;
 	
 	
+	public Integer getId() {
+		return id;
+	}
+	public void setId(Integer id) {
+		this.id = id;
+	}
 	public UserDto getAuthor() {
 		return author;
 	}

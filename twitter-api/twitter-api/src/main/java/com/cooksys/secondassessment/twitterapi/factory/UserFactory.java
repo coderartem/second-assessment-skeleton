@@ -1,4 +1,4 @@
-package com.cooksys.secondassessment.twitterapi.cfactory;
+package com.cooksys.secondassessment.twitterapi.factory;
 
 import java.sql.Timestamp;
 
@@ -27,14 +27,16 @@ public class UserFactory {
 	public Users getUser(InputDto input){
 		
 		if(uR.findByCredentialsAndDeleted(input.getCredentials(),true)!=null){
-			reactivateUser(input.getCredentials().getUsernam());
-			return uR.findByCredentials(input.getCredentials());
+			reactivateUser(input.getCredentials().getUsername());
+			System.out.println(input.getCredentials().getUsername());
+			System.out.println(uR.findByCredentialsAndDeleted(input.getCredentials(), false)!=null);
+			return uR.findByCredentialsAndDeleted(input.getCredentials(), false);  //pomenyal na AndDeleted 9.21 10.21am
 		}
-		if(uR.findByUsername(input.getCredentials().getUsernam())!=null){
+		if(uR.findByUsername(input.getCredentials().getUsername())!=null){
 			return null;
 		}
 			Users user = new Users();
-			user.setUsername(input.getCredentials().getUsernam());
+			user.setUsername(input.getCredentials().getUsername());
 			user.setProfile(input.getProfile());
 			user.setJoined(new Timestamp(System.currentTimeMillis()).getTime());
 			user.setCredentials(input.getCredentials());
@@ -45,12 +47,13 @@ public class UserFactory {
 	
 	@Transactional
 	public void reactivateUser(String usernam) {
+		System.out.println("Lol");
 		Users user = uR.findByUsername(usernam);
 		user.setDeleted(false);
 		for(Tweet x : tR.findByAuthorUsernameAndDeleted(user.getUsername(), true)){
 			x.setDeleted(false);
 		}
-		
+		System.out.println("finish");
 	}
 	
 	@Transactional

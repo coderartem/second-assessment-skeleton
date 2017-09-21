@@ -6,13 +6,15 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.cooksys.secondassessment.twitterapi.cfactory.TweetFactory;
 import com.cooksys.secondassessment.twitterapi.dto.TweetDto;
 import com.cooksys.secondassessment.twitterapi.dto.UserDto;
+import com.cooksys.secondassessment.twitterapi.entity.Context;
 import com.cooksys.secondassessment.twitterapi.entity.Credentials;
 import com.cooksys.secondassessment.twitterapi.entity.Mention;
 import com.cooksys.secondassessment.twitterapi.entity.Tweet;
 import com.cooksys.secondassessment.twitterapi.entity.Users;
+import com.cooksys.secondassessment.twitterapi.factory.ContextFactory;
+import com.cooksys.secondassessment.twitterapi.factory.TweetFactory;
 import com.cooksys.secondassessment.twitterapi.input.dto.TweetInput;
 import com.cooksys.secondassessment.twitterapi.mapper.TweetMapper;
 import com.cooksys.secondassessment.twitterapi.mapper.UserMapper;
@@ -27,13 +29,15 @@ public class TweetService {
 	private TweetRepository tR;
 	private UserMapper uM;
 	private TweetFactory tC;
+	private ContextFactory cF;
 
-	public TweetService(TweetMapper tM,  UserRepository uR, TweetRepository tR, UserMapper uM, TweetFactory tC) {
+	public TweetService(TweetMapper tM,  UserRepository uR, TweetRepository tR, UserMapper uM, TweetFactory tC, ContextFactory cF) {
 		this.tM = tM;
 		this.uR = uR;
 		this.tR = tR;
 		this.uM = uM;
 		this.tC = tC;
+		this.cF = cF;
 	}
 
 
@@ -62,15 +66,15 @@ public class TweetService {
 	}
 
 	@Transactional
-	public int like(Integer id, Credentials cred) {		//!
+	public boolean like(Integer id, Credentials cred) {		//!
 		Tweet tweet = tR.findByIdAndDeletedAndAuthorDeleted(id, false,false);
 		Users user = uR.findByCredentialsAndDeleted(cred, false);
 		if(tweet!=null && user!=null){
 				tweet.getLikedBy().add(user);
 				user.getLiked().add(tweet);
-			return 1;
+			return true;
 		}
-		return 0;
+		return false;
 		
 	}
 
@@ -140,10 +144,16 @@ public class TweetService {
 		return uM.usersToUsersDto(uR.findByUsernameInAndDeleted(usernames, false));
 	}
 	
+	public Context getContext(Integer id) {
+		return cF.getContext(id);
+	}
 	
 	public  List<TweetDto> authorTweets(String username){		//!
 		return tM.tweetsToTweetDtos(tR.findByAuthorUsernameAndDeleted(username, false));
 	}
+
+
+	
 
 
 	

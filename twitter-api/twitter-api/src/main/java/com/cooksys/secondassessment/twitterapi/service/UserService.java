@@ -8,12 +8,12 @@ import javax.persistence.EntityManager;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.cooksys.secondassessment.twitterapi.cfactory.UserFactory;
 import com.cooksys.secondassessment.twitterapi.dto.TweetDto;
 import com.cooksys.secondassessment.twitterapi.dto.UserDto;
 import com.cooksys.secondassessment.twitterapi.entity.Credentials;
 import com.cooksys.secondassessment.twitterapi.entity.Tweet;
 import com.cooksys.secondassessment.twitterapi.entity.Users;
+import com.cooksys.secondassessment.twitterapi.factory.UserFactory;
 import com.cooksys.secondassessment.twitterapi.input.dto.InputDto;
 import com.cooksys.secondassessment.twitterapi.mapper.TweetMapper;
 import com.cooksys.secondassessment.twitterapi.mapper.UserMapper;
@@ -52,7 +52,7 @@ public class UserService {
 	}
 
 	public List<UserDto> getAllUsers() {
-		return uM.usersToUsersDto(uR.findByDeleted(false));  ///Adjust to unDeleted only
+		return uM.usersToUsersDto(uR.findByDeleted(false));
 	}
 
 
@@ -77,7 +77,7 @@ public class UserService {
 	public boolean followHim(String username, Credentials cred) {
 			Users user = uR.findByUsernameAndDeleted(username, false);
 			Users follower = uR.findByCredentialsAndDeleted(cred, false);
-			if(user!=null && follower!=null && uR.findByUsernameAndFollowersCredentials(user.getUsername(), follower.getCredentials())==null){
+			if(user!=null && follower!=null && uR.findByUsernameAndFollowersCredentials(user.getUsername(), follower.getCredentials())==null && follower!=user){
 				user.getFollowers().add(follower);
 				follower.getFollowing().add(user);
 				return true;
@@ -86,8 +86,8 @@ public class UserService {
 
 	@Transactional
 	public boolean unfollowHim(String username, Credentials cred) {
-		Users user = uR.findByUsername(username);
-		Users follower = uR.findByCredentials(cred);
+		Users user = uR.findByUsernameAndDeleted(username, false);
+		Users follower = uR.findByCredentialsAndDeleted(cred, false);
 		if(user!=null && follower!=null && uR.findByUsernameAndFollowersCredentials(user.getUsername(), follower.getCredentials())!=null){
 			user.getFollowers().remove(follower);
 			follower.getFollowing().remove(user);
@@ -101,7 +101,7 @@ public class UserService {
 		Users user = uR.findByUsernameAndDeleted(username, false);				//Adjust  
 		List<TweetDto> res=new ArrayList<>();					//Mogut byt dublikaty tweetov !!!
 		if(user!=null){											//Need sorting
-			res.addAll(getTweets(username));
+			res.addAll(tS.authorTweets(username));
 			for(Users x : user.getFollowing()){
 				res.addAll(tS.authorTweets(x.getUsername()));
 			}
@@ -111,12 +111,11 @@ public class UserService {
 	}
 	
 	public List<TweetDto> getTweets(String username){				//Still need to sort
-		Users user = uR.findByUsername(username);
-		if(user!=null && !user.isDeleted()){ 
-			
+		Users user = uR.findByUsernameAndDeleted(username, false);
+		if(user!=null){ 
 			return  tS.authorTweets(username);
 		}
-		return new ArrayList<TweetDto>();
+		return null;
 		
 	}
 

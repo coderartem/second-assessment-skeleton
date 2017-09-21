@@ -1,4 +1,4 @@
-package com.cooksys.secondassessment.twitterapi.cfactory;
+package com.cooksys.secondassessment.twitterapi.factory;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 import com.cooksys.secondassessment.twitterapi.entity.Hashtag;
 import com.cooksys.secondassessment.twitterapi.entity.Mention;
 import com.cooksys.secondassessment.twitterapi.entity.Tweet;
+import com.cooksys.secondassessment.twitterapi.entity.Users;
 import com.cooksys.secondassessment.twitterapi.input.dto.TweetInput;
 import com.cooksys.secondassessment.twitterapi.repository.HashTagRepository;
 import com.cooksys.secondassessment.twitterapi.repository.MentionRepsoitory;
@@ -35,10 +36,10 @@ public class TweetFactory {
 	
 	public Tweet createTweet(TweetInput tweetIn){
 			Tweet tweet = new Tweet();
+			Users user = uR.findByCredentialsAndDeleted(tweetIn.getCredentials(), false);
+			if(user==null) return null;
 			
-			if(uR.findByCredentialsAndDeleted(tweetIn.getCredentials(), false)==null) return null;
-			
-			tweet.setAuthor(uR.findByCredentials(tweetIn.getCredentials())); 
+			tweet.setAuthor(user); 
 			tweet.setPosted(new Timestamp(System.currentTimeMillis()).getTime());
 			tweet.setContent(tweetIn.getContent());
 			tweet.setDeleted(false);
