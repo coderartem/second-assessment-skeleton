@@ -40,12 +40,12 @@ public class TweetController {
 		return tS.postTweet(tweetInput);
 	}
 	
-	@GetMapping("tweets{id}")
+	@GetMapping("{id}")
 	public TweetDto getThatTweet(@PathVariable Integer id){
 		return tS.getThatTweet(id);
 	}
 	
-	@DeleteMapping("tweets/{id}")
+	@DeleteMapping("{id}")
 	public TweetDto deleteThisCrap(@PathVariable Integer id, @RequestBody Credentials cred){
 		return tS.deleteThisCrap(id,cred);
 	}

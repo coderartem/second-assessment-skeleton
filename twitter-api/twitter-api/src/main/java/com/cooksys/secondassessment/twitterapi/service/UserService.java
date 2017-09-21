@@ -22,41 +22,48 @@ import com.cooksys.secondassessment.twitterapi.repository.UserRepository;
 @Service
 public class UserService {
 
-	private UserRepository userRepository;
+	private UserRepository uR;
 	private UserMapper uM;
 	private EntityManager eM;   //Vozmozhno ne nuzhen
 	private TweetRepository tR;
 	private TweetService tS;
+	private ConvertInput cI;
 
-	public UserService(UserRepository userRepository, UserMapper uM, EntityManager eM, TweetRepository tR, TweetService tS) {
-		this.userRepository=userRepository;
+	public UserService(UserRepository userRepository, UserMapper uM, EntityManager eM, TweetRepository tR, TweetService tS, ConvertInput cI) {
+		this.uR=userRepository;
 		this.uM = uM;
 		this.eM = eM;
 		this.tR = tR;
 		this.tS = tS;
+		this.cI = cI;
 	}
 	
 	
 	public UserDto getThatUser(String username){
-		return uM.userToUserDto(userRepository.findByUsername(username));
+		return uM.userToUserDto(uR.findByUsernameAndDeleted(username, false));
 	}
 
 	public UserDto createNewUser(InputDto input) {
-		Users user = new ConvertInput(input).getUser();  ////Zamenit' na Mapper
-		userRepository.save(user);
+		Users user = cI.getUser(input);  ////Zamenit' na Mapper
+		if(user!=null){
+			uR.saveAndFlush(user);
 		return getThatUser(user.getUsername());
+		}return null;
 	}
 
 	public List<UserDto> getAllUsers() {
-		return uM.usersToUsersDto(userRepository.findAll());  ///Adjust to unDeleted only
+		return uM.usersToUsersDto(uR.findByDeleted(false));  ///Adjust to unDeleted only
 	}
 
 
 	@Transactional
 	public UserDto deleteThisMF(String username) {
-		Users user = userRepository.findByUsernameAndDeleted(username, false);
+		Users user = uR.findByUsernameAndDeleted(username, false);
 		if(user==null) return null;
 		user.setDeleted(true);
+		for(Tweet x : tR.findByAuthorUsernameAndDeleted(user.getUsername(), false)){
+			x.setDeleted(true);
+		}
 		return uM.userToUserDto(user);
 	}
 
@@ -64,8 +71,8 @@ public class UserService {
 	@Transactional
 	public UserDto updateThisMF(String username, InputDto input) {
 		
-		Users user = new ConvertInput(input).getUser();
-		Users oldUser = userRepository.findByCredentials(input.getCredentials());
+		Users user = cI.getUser(input);
+		Users oldUser = uR.findByCredentials(input.getCredentials());
 		if(oldUser!=null){
 			
 			//Some PATCH Code Here
@@ -75,12 +82,9 @@ public class UserService {
 
 	@Transactional
 	public int followHim(String username, Credentials cred) {
-			Users user = userRepository.findByUsername(username);
-			Users follower = userRepository.findByCredentials(cred);
-			
-			//Add FOLLOWER check code
-			
-			if(user!=null && follower!=null){
+			Users user = uR.findByUsernameAndDeleted(username, false);
+			Users follower = uR.findByCredentialsAndDeleted(cred, false);
+			if(user!=null && follower!=null && uR.findByUsernameAndFollowersCredentials(user.getUsername(), follower.getCredentials())==null){
 				user.getFollowers().add(follower);
 				follower.getFollowing().add(user);
 				return 1;
@@ -89,37 +93,33 @@ public class UserService {
 
 	@Transactional
 	public int unfollowHim(String username, Credentials cred) {
-		Users user = userRepository.findByUsername(username);
-		Users follower = userRepository.findByCredentials(cred);
-		
-		//Add UN-FOLLOWER check code
-		
-		if(user!=null && follower!=null){
+		Users user = uR.findByUsername(username);
+		Users follower = uR.findByCredentials(cred);
+		if(user!=null && follower!=null && uR.findByUsernameAndFollowersCredentials(user.getUsername(), follower.getCredentials())!=null){
 			user.getFollowers().remove(follower);
 			follower.getFollowing().remove(user);
 			return 1;
 		}else return 0;
-		
 	}
 
 
 	public List<TweetDto> getFeed(String username) {
 
-		Users user = userRepository.findByUsername(username);
+		Users user = uR.findByUsername(username);
 		List<TweetDto> res=new ArrayList<>();					//Mogut byt dublikaty tweetov !!!
 		if(user!=null && !user.isDeleted()){					//Need sorting
 			res.addAll(getTweets(username));						
-			List<Users> following = userRepository.findByUsernameAndFollowingDeleted(username, false);
+			List<Users> following = uR.findByUsernameAndFollowingDeleted(username, false);
 			for(Users x : following){
 				res.addAll(tS.authorTweets(x.getUsername()));
 			}
+			return res;
 		}
-		
 		return null;
 	}
 	
 	public List<TweetDto> getTweets(String username){				//Still need to sort
-		Users user = userRepository.findByUsername(username);
+		Users user = uR.findByUsername(username);
 		if(user!=null && !user.isDeleted()){ 
 			
 			return  tS.authorTweets(username);
@@ -130,12 +130,16 @@ public class UserService {
 
 
 	public List<UserDto> whoAmIFollowing(String username) {
-		return uM.usersToUsersDto(userRepository.findByUsername(username).getFollowing());
+		List<Users> following = uR.findByUsernameAndDeleted(username, false).getFollowing();
+		following.removeIf(t->t.isDeleted()==true);
+		return uM.usersToUsersDto(following);
 	}
 
 
 	public List<UserDto> myFanClub(String username) {
-		return uM.usersToUsersDto(userRepository.findByUsername(username).getFollowers());
+		List<Users> followers = uR.findByUsernameAndDeleted(username, false).getFollowers();
+		followers.removeIf(t->t.isDeleted()==true);
+		return uM.usersToUsersDto(followers);
 	}
 
 

@@ -13,7 +13,7 @@ public interface TweetRepository extends JpaRepository<Tweet,Integer> {
 	Tweet findByIdAndDeletedAndAuthorDeleted(Integer id, Boolean tweetDeleted, Boolean authorDeleted);
 	List<Tweet> findByDeleted(Boolean deleted);
 	Tweet findByAuthorCredentialsAndIdAndDeletedAndAuthorDeleted(Credentials cred, Integer id, Boolean tweetDeleted, Boolean authorDeleted);
-	List<Tweet> findByAuthorUsernameAndDeleted(String username, Boolean deleted);  //Chet ne rabotaet na reposty
+	List<Tweet> findByAuthorUsernameAndDeleted(String username, Boolean deleted);  //Chet ne rabotaet na reposty (t.k. 2 Authora poluchaetsya?)
 	List<Tweet> findByRepostOf(Tweet tweet);
 	List<Tweet> findByInReplyTo(Tweet tweet);
 	List<Tweet> findByMentionsIn(String username);
