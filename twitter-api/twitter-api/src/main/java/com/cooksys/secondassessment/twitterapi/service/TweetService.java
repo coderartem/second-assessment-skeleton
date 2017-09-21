@@ -10,10 +10,12 @@ import com.cooksys.secondassessment.twitterapi.dto.TweetDto;
 import com.cooksys.secondassessment.twitterapi.dto.UserDto;
 import com.cooksys.secondassessment.twitterapi.entity.Context;
 import com.cooksys.secondassessment.twitterapi.entity.Credentials;
+import com.cooksys.secondassessment.twitterapi.entity.Hashtag;
 import com.cooksys.secondassessment.twitterapi.entity.Mention;
 import com.cooksys.secondassessment.twitterapi.entity.Tweet;
 import com.cooksys.secondassessment.twitterapi.entity.Users;
 import com.cooksys.secondassessment.twitterapi.factory.ContextFactory;
+import com.cooksys.secondassessment.twitterapi.factory.Sorter;
 import com.cooksys.secondassessment.twitterapi.factory.TweetFactory;
 import com.cooksys.secondassessment.twitterapi.input.dto.TweetInput;
 import com.cooksys.secondassessment.twitterapi.mapper.TweetMapper;
@@ -30,19 +32,23 @@ public class TweetService {
 	private UserMapper userMapper;
 	private TweetFactory tweetFactory;
 	private ContextFactory contextFactory;
+	private Sorter sort;
 
-	public TweetService(TweetMapper tweetMapper,  UserRepository userRepository, TweetRepository tweetRepository, UserMapper userMapper, TweetFactory tweetFactory, ContextFactory contextFactory) {
+	public TweetService(TweetMapper tweetMapper,  UserRepository userRepository, TweetRepository tweetRepository, UserMapper userMapper, 
+			TweetFactory tweetFactory, ContextFactory contextFactory, Sorter sort) {
 		this.tweetMapper = tweetMapper;
 		this.userRepository = userRepository;
 		this.tweetRepository = tweetRepository;
 		this.userMapper = userMapper;
 		this.tweetFactory = tweetFactory;
 		this.contextFactory = contextFactory;
+		this.sort = sort;
 	}
 
 
 	public List<TweetDto> getAll() {		//!
-		return tweetMapper.tweetsToTweetDtos(tweetRepository.findByDeleted(false));
+		List<TweetDto> tweetList = tweetMapper.tweetsToTweetDtos(tweetRepository.findByDeleted(false));
+		return tweetList!=null?sort.sortTweets(tweetList):null;
 	}
 
 	public TweetDto postTweet(TweetInput tweetInput) {
@@ -95,7 +101,7 @@ public class TweetService {
 		
 		TweetInput input = new TweetInput();				//Zamenit' na norm Tweet Factory
 		input.setCredentials(cred);								//Need credentials check
-		input.setContent("");
+		input.setContent("");									//Ugly
 		Tweet repost;
 		if(tweet!=null && user!=null){
 			repost = tweetFactory.createTweet(input);
@@ -108,7 +114,8 @@ public class TweetService {
 	
 	public List<UserDto> getTweetLikers(Integer id) {
 		if(tweetRepository.findByIdAndDeletedAndAuthorDeleted(id, false,false)!=null){
-			return userMapper.usersToUsersDto(userRepository.findByDeletedAndLikedId(false,id)); //HZ ne testil (mozhno sozdat' List  of likers on Tweet esli eto ne budet rabotat')
+			List<UserDto> userList = userMapper.usersToUsersDto(userRepository.findByDeletedAndLikedId(false,id));
+			return userList!=null?sort.sortUsers(userList):null; //HZ ne testil (mozhno sozdat' List  of likers on Tweet esli eto ne budet rabotat')
 		}
 		return null;
 	}
@@ -116,7 +123,8 @@ public class TweetService {
 	public List<TweetDto> getReplies(Integer id) {
 		Tweet tweet = tweetRepository.findByIdAndDeletedAndAuthorDeleted(id, false,false);
 		if(tweet!=null){
-			return tweetMapper.tweetsToTweetDtos(tweet.getReplies());
+			List<TweetDto> tweetList = tweetMapper.tweetsToTweetDtos(tweet.getReplies());
+			return tweetList!=null?sort.sortTweets(tweetList):null;
 		}
 		return null;
 	}
@@ -124,7 +132,8 @@ public class TweetService {
 	public List<TweetDto> getRepsots(Integer id) {		//!
 		Tweet tweet = tweetRepository.findByIdAndDeletedAndAuthorDeleted(id, false,false);
 		if(tweet!=null){
-			return tweetMapper.tweetsToTweetDtos(tweetRepository.findByRepostOf(tweet));
+			List<TweetDto> tweetList = tweetMapper.tweetsToTweetDtos(tweetRepository.findByRepostOf(tweet));
+			return tweetList!=null?sort.sortTweets(tweetList):null;
 		}
 		return null;
 	}
@@ -136,22 +145,25 @@ public class TweetService {
 		for(Mention x : tweet.getMentions()){
 			usernames.add(x.getMention().substring(1));
 		}		
-		return userMapper.usersToUsersDto(userRepository.findByUsernameInAndDeleted(usernames, false));
+		List<UserDto> userList = userMapper.usersToUsersDto(userRepository.findByUsernameInAndDeleted(usernames, false));
+		return userList!=null?sort.sortUsers(userList):null;
 	}
 	
 	public Context getContext(Integer id) {
 		return contextFactory.getContext(id);
 	}
 	
+	public List<Hashtag> getTweetTags(Integer id) {
+		Tweet tweet = tweetRepository.findByIdAndDeletedAndAuthorDeleted(id, false, false);
+		if(tweet==null || tweet.getHashtag()==null) return null;
+		return sort.sortHashtag(tweet.getHashtag());
+	}
+	
 	public  List<TweetDto> authorTweets(String username){		//!
-		return tweetMapper.tweetsToTweetDtos(tweetRepository.findByAuthorUsernameAndDeleted(username, false));
+		List<TweetDto> tweetList = tweetMapper.tweetsToTweetDtos(tweetRepository.findByAuthorUsernameAndDeleted(username, false));
+		return tweetList!=null?sort.sortTweets(tweetList):null;
 	}
 
 
-	
-
-
-	
-
-	
+		
 }

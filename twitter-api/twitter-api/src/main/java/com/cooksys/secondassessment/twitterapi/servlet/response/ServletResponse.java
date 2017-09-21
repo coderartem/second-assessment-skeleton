@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import com.cooksys.secondassessment.twitterapi.dto.TweetDto;
 import com.cooksys.secondassessment.twitterapi.dto.UserDto;
+import com.cooksys.secondassessment.twitterapi.entity.Hashtag;
 
 @Component
 public class ServletResponse {
@@ -40,6 +41,13 @@ public class ServletResponse {
 			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
 		}
 		return tweetList;
+	}
+	
+	public List<Hashtag> listOfTagsNullCheck(List<Hashtag> tagsList, HttpServletResponse response){
+		if(tagsList==null){
+			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+		}
+		return tagsList;
 	}
 
 }

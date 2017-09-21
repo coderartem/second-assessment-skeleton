@@ -16,6 +16,7 @@ import com.cooksys.secondassessment.twitterapi.dto.TweetDto;
 import com.cooksys.secondassessment.twitterapi.dto.UserDto;
 import com.cooksys.secondassessment.twitterapi.entity.Context;
 import com.cooksys.secondassessment.twitterapi.entity.Credentials;
+import com.cooksys.secondassessment.twitterapi.entity.Hashtag;
 import com.cooksys.secondassessment.twitterapi.input.dto.TweetInput;
 import com.cooksys.secondassessment.twitterapi.service.TweetService;
 import com.cooksys.secondassessment.twitterapi.servlet.response.ServletResponse;
@@ -93,7 +94,14 @@ public class TweetController {
 	
 	@GetMapping("{id}/context")
 	public Context getContext(@PathVariable Integer id, HttpServletResponse response){
-		return tweetService.getContext(id);
+		Context context = tweetService.getContext(id);
+		response.setStatus(context!=null?HttpServletResponse.SC_OK:HttpServletResponse.SC_NOT_FOUND);
+		return context;
+	}
+	
+	@GetMapping("{id}/tags")
+	public List<Hashtag> getTweetTags(@PathVariable Integer id, HttpServletResponse response){
+		return servletResponse.listOfTagsNullCheck(tweetService.getTweetTags(id), response);
 	}
 
 }

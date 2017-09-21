@@ -29,7 +29,8 @@ public class TweetFactory {
 	private HashTagRepository hashTagRepository;
 	private MentionRepsoitory mentionRepsoitory;
 	
-	public TweetFactory( UserRepository userRepository, TweetRepository tweetRepository, HashTagRepository hashTagRepository, MentionRepsoitory mentionRepsoitory) {
+	public TweetFactory( UserRepository userRepository, TweetRepository tweetRepository, HashTagRepository hashTagRepository, 
+			MentionRepsoitory mentionRepsoitory) {
 		this.userRepository = userRepository;
 		this.tweetRepository = tweetRepository;
 		this.hashTagRepository = hashTagRepository;
@@ -56,22 +57,19 @@ public class TweetFactory {
 	public List<Hashtag> tagsCheck(String content){
 		
 		Matcher hashTag = Pattern.compile("#(\\w+)").matcher(content);
-		List<Hashtag> hL = new ArrayList<>();
+		List<Hashtag> tagsList = new ArrayList<>();
 		while(hashTag.find()){
 			Hashtag existingHashtag = hashTagRepository.findByLabel(hashTag.group());
 			if(existingHashtag!=null){
 				existingHashtag.setLastUsed(new Timestamp(System.currentTimeMillis()).getTime());
-				hL.add(existingHashtag);
+				tagsList.add(existingHashtag);
 			}else{
-				
-				Hashtag newHashtag = new Hashtag();
-				newHashtag.setLabel(hashTag.group());
-				newHashtag.setLastUsed(newHashtag.getFirstUsed());
+				Hashtag newHashtag = new Hashtag(hashTag.group());
 				hashTagRepository.saveAndFlush(newHashtag);
-				hL.add(newHashtag);
+				tagsList.add(newHashtag);
 			}
 	}
-		return hL;
+		return tagsList;
 	}
 	
 	public List<Mention> mentionsCheck(String content){
@@ -87,8 +85,7 @@ public class TweetFactory {
 				if(userRepository.findByUsernameAndDeleted(mention.group().substring(1), false)==null){
 					continue;
 				}
-				Mention newMention = new Mention();
-				newMention.setMention(mention.group());
+				Mention newMention = new Mention(mention.group());
 				mentionRepsoitory.saveAndFlush(newMention);
 				mentionsList.add(newMention);
 			}

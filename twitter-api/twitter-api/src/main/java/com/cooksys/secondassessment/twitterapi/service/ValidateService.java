@@ -10,27 +10,24 @@ import com.cooksys.secondassessment.twitterapi.repository.UserRepository;
 @Service
 public class ValidateService {
 	
-	private UserService uS;
-	private UserRepository uR;
-	private HashTagRepository hR;
+	private UserRepository userRepository;
+	private HashTagRepository hashTagRepository;
 
-	public ValidateService(UserService uS, UserRepository uR, HashTagRepository hR) {
-		this.uS = uS;
-		this.uR = uR;
-		this.hR = hR;
+	public ValidateService(UserRepository userRepository, HashTagRepository hashTagRepository) {
+		this.userRepository = userRepository;
+		this.hashTagRepository = hashTagRepository;
 	}
 
-	public boolean hasUser(String username) {
-		return uR.findByUsername(username)!=null;
+	public boolean userExists(String username) {
+		return userRepository.findByUsernameAndDeleted(username,false)!=null;
 	}
 
 	public boolean nameAvailable(String username) {
-		Users user = uR.findByUsernameAndDeleted(username,false);
-		return user!=null?user.isDeleted():true;
+		return userRepository.findByUsername(username)==null;
 	}
 
 	public boolean tagExists(String label) {
-		return hR.findByLabel(label)!=null?true:false;
+		return hashTagRepository.findByLabel(label)!=null;
 	}
 
 	

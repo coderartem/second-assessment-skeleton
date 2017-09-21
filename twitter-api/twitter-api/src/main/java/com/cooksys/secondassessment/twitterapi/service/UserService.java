@@ -13,6 +13,7 @@ import com.cooksys.secondassessment.twitterapi.dto.UserDto;
 import com.cooksys.secondassessment.twitterapi.entity.Credentials;
 import com.cooksys.secondassessment.twitterapi.entity.Tweet;
 import com.cooksys.secondassessment.twitterapi.entity.Users;
+import com.cooksys.secondassessment.twitterapi.factory.Sorter;
 import com.cooksys.secondassessment.twitterapi.factory.UserFactory;
 import com.cooksys.secondassessment.twitterapi.input.dto.InputDto;
 import com.cooksys.secondassessment.twitterapi.mapper.TweetMapper;
@@ -29,14 +30,17 @@ public class UserService {
 	private TweetService tweetService;
 	private UserFactory usersFactory;
 	private TweetMapper tweetMapper;
+	private Sorter sort;
 
-	public UserService(UserRepository userRepository, UserMapper userMapper, TweetRepository tweetRepository, TweetService tweetService, UserFactory usersFactory, TweetMapper tweetMapper) {
+	public UserService(UserRepository userRepository, UserMapper userMapper, TweetRepository tweetRepository, 
+			TweetService tweetService, UserFactory usersFactory, TweetMapper tweetMapper, Sorter sort) {
 		this.userRepository=userRepository;
 		this.userMapper = userMapper;
 		this.tweetRepository = tweetRepository;
 		this.tweetService = tweetService;
 		this.usersFactory = usersFactory;
 		this.tweetMapper = tweetMapper;
+		this.sort = sort;
 	}
 	
 	
@@ -49,7 +53,8 @@ public class UserService {
 	}
 
 	public List<UserDto> getAllUsers() {
-		return userMapper.usersToUsersDto(userRepository.findByDeleted(false));
+		List<UserDto> userList = userMapper.usersToUsersDto(userRepository.findByDeleted(false));
+		return userList!=null?sort.sortUsers(userList):null;
 	}
 
 
@@ -68,7 +73,8 @@ public class UserService {
 	public boolean followHim(String username, Credentials cred) {
 			Users user = userRepository.findByUsernameAndDeleted(username, false);
 			Users follower = userRepository.findByCredentialsAndDeleted(cred, false);
-			if(user!=null && follower!=null && userRepository.findByUsernameAndFollowersCredentials(user.getUsername(), follower.getCredentials())==null && follower!=user){
+			if(user!=null && follower!=null && userRepository.findByUsernameAndFollowersCredentials(user.getUsername(), 
+					follower.getCredentials())==null && follower!=user){
 				user.getFollowers().add(follower);
 				follower.getFollowing().add(user);
 				return true;
@@ -79,7 +85,8 @@ public class UserService {
 	public boolean unfollowHim(String username, Credentials cred) {
 		Users user = userRepository.findByUsernameAndDeleted(username, false);
 		Users follower = userRepository.findByCredentialsAndDeleted(cred, false);
-		if(user!=null && follower!=null && userRepository.findByUsernameAndFollowersCredentials(user.getUsername(), follower.getCredentials())!=null){
+		if(user!=null && follower!=null && userRepository.findByUsernameAndFollowersCredentials(user.getUsername(), 
+				follower.getCredentials())!=null){
 			user.getFollowers().remove(follower);
 			follower.getFollowing().remove(user);
 			return true;
@@ -96,7 +103,7 @@ public class UserService {
 			for(Users x : user.getFollowing()){
 				res.addAll(tweetService.authorTweets(x.getUsername()));
 			}
-			return res;
+			return sort.sortTweets(res);
 		}
 		return null;
 	}
@@ -114,7 +121,8 @@ public class UserService {
 		if(user==null)return null;
 		List<Users> following = user.getFollowing();
 		following.removeIf(t->t.isDeleted()==true);
-		return userMapper.usersToUsersDto(following);
+		List<UserDto> userList = userMapper.usersToUsersDto(following);
+		return userList!=null?sort.sortUsers(userList):null;
 	}
 
 
@@ -123,12 +131,14 @@ public class UserService {
 		if(user==null)return null;
 		List<Users> followers = user.getFollowers();
 		followers.removeIf(t->t.isDeleted()==true);
-		return userMapper.usersToUsersDto(followers);
+		List<UserDto> userList = userMapper.usersToUsersDto(followers);
+		return userList!=null?sort.sortUsers(userList):null;
 	}
 
 
 	public List<TweetDto> whereUserMentioned(String username) {
-		return tweetMapper.tweetsToTweetDtos(tweetRepository.findByDeletedAndMentionsMention(false, "@"+username));
+		List<TweetDto> tweetList = tweetMapper.tweetsToTweetDtos(tweetRepository.findByDeletedAndMentionsMention(false, "@"+username));
+		return tweetList!=null?sort.sortTweets(tweetList):null;
 	}
 	
 	

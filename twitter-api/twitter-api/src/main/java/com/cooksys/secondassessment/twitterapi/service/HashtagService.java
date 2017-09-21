@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 
 import com.cooksys.secondassessment.twitterapi.dto.TweetDto;
 import com.cooksys.secondassessment.twitterapi.entity.Hashtag;
+import com.cooksys.secondassessment.twitterapi.factory.Sorter;
 import com.cooksys.secondassessment.twitterapi.mapper.TweetMapper;
 import com.cooksys.secondassessment.twitterapi.repository.HashTagRepository;
 import com.cooksys.secondassessment.twitterapi.repository.TweetRepository;
@@ -16,21 +17,23 @@ public class HashtagService {
 	private HashTagRepository hashTagRepository;
 	private TweetRepository tweetRepository;
 	private TweetMapper tweetMapper;
+	private Sorter sort;
 
-	public HashtagService(HashTagRepository hashTagRepository, TweetRepository tweetRepository, TweetMapper tweetMapper) {
+	public HashtagService(HashTagRepository hashTagRepository, TweetRepository tweetRepository, TweetMapper tweetMapper, Sorter sort) {
 		this.hashTagRepository = hashTagRepository;
 		this.tweetRepository = tweetRepository;
 		this.tweetMapper = tweetMapper;
+		this.sort = sort;
 	}
 
 	public List<Hashtag> getAllTags() {
-		return hashTagRepository.findAll();
+		List<Hashtag> tagsList = hashTagRepository.findAll();
+		return tagsList!=null?sort.sortHashtag(tagsList):null;
 	}
 
 	public List<TweetDto> getAllTweetsWithTag(String label) {
-		return tweetMapper.tweetsToTweetDtos(tweetRepository.findByDeletedAndHashtagLabel(false, label));
+		List<TweetDto> tweetList = tweetMapper.tweetsToTweetDtos(tweetRepository.findByDeletedAndHashtagLabel(false, label));
+		return tweetList!=null?sort.sortTweets(tweetList):null;
 	}
-	
-	
-	
+		
 }

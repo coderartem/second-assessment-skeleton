@@ -12,6 +12,14 @@ public class Mention {
 	private Integer id;
 	private String mention;
 	
+	public Mention() {
+		// TODO Auto-generated constructor stub
+	}
+	
+	public Mention(String mention) {
+		this.mention = mention;
+	}
+	
 	
 	public Integer getId() {
 		return id;

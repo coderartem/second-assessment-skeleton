@@ -19,7 +19,10 @@ public class Hashtag {
 	public Hashtag() {
 	}
 	
-	
+	public Hashtag(String label) {
+		this.label = label;
+		this.lastUsed = firstUsed;
+	}
 	
 	public String getLabel() {
 		return label;

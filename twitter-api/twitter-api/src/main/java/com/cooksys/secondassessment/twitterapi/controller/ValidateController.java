@@ -22,7 +22,7 @@ public class ValidateController {
 	
 	@GetMapping("username/exists/@{username}")
 	public boolean hasUser(@PathVariable String username){
-		return validateService.hasUser(username);
+		return validateService.userExists(username);
 	}
 	
 	@GetMapping("username/available/@{username}")
