@@ -14,25 +14,25 @@ public class ValidateController {
 
 	
 
-	private ValidateService vS;
+	private ValidateService validateService;
 
-	public ValidateController(ValidateService vS) {
-		this.vS = vS;
+	public ValidateController(ValidateService validateService) {
+		this.validateService = validateService;
 	}
 	
 	@GetMapping("username/exists/@{username}")
 	public boolean hasUser(@PathVariable String username){
-		return vS.hasUser(username);
+		return validateService.hasUser(username);
 	}
 	
 	@GetMapping("username/available/@{username}")
 	public boolean nameAvailable(@PathVariable String username){
-		return vS.nameAvailable(username);
+		return validateService.nameAvailable(username);
 	}
 	
 	@GetMapping("tag/exists/{label}")
 	public boolean tagExists(@PathVariable String label){
-		return vS.tagExists(label);
+		return validateService.tagExists(label);
 	}
 
 }

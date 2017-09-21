@@ -26,74 +26,74 @@ public class TweetController {
 	
 	
 	
-	private TweetService tS;
-	private ServletResponse sR;
+	private TweetService tweetService;
+	private ServletResponse servletResponse;
 
-	public TweetController(TweetService tS, ServletResponse sR) {
-		this.tS = tS;
-		this.sR = sR;
+	public TweetController(TweetService tweetService, ServletResponse servletResponse) {
+		this.tweetService = tweetService;
+		this.servletResponse = servletResponse;
 	}
 	
 	
 	@GetMapping
 	public List<TweetDto> getAllTweets(){
-		return tS.getAll();
+		return tweetService.getAll();
 	}
 	
 	@PostMapping
 	public TweetDto postTweet (@RequestBody TweetInput tweetInput, HttpServletResponse response){
-		return sR.tweetNullCheck(tS.postTweet(tweetInput), response);
+		return servletResponse.tweetNullCheck(tweetService.postTweet(tweetInput), response);
 	}
 	
 	@GetMapping("{id}")
 	public TweetDto getThatTweet(@PathVariable Integer id, HttpServletResponse response){
-		return sR.tweetNullCheck(tS.getThatTweet(id), response);
+		return servletResponse.tweetNullCheck(tweetService.getThatTweet(id), response);
 	}
 	
 	@DeleteMapping("{id}")
 	public TweetDto deleteThisCrap(@PathVariable Integer id, @RequestBody Credentials cred, HttpServletResponse response){
-		return sR.tweetNullCheck(tS.deleteThisCrap(id,cred), response);
+		return servletResponse.tweetNullCheck(tweetService.deleteThisCrap(id,cred), response);
 	}
 	
 	@PostMapping("{id}/like")
 	public void like(@PathVariable Integer id, @RequestBody Credentials cred, HttpServletResponse response){
-		boolean res = tS.like(id, cred);
+		boolean res = tweetService.like(id, cred);
 		response.setStatus(res?HttpServletResponse.SC_OK:HttpServletResponse.SC_NOT_FOUND);
 	}
 	
 	@PostMapping("{id}/reply")
 	public TweetDto reply(@PathVariable Integer id, @RequestBody TweetInput tweetIn, HttpServletResponse response){
-		return sR.tweetNullCheck(tS.reply(id, tweetIn), response);
+		return servletResponse.tweetNullCheck(tweetService.reply(id, tweetIn), response);
 	}
 	
 	@PostMapping("{id}/repost")
 	public TweetDto repost(@PathVariable Integer id, @RequestBody Credentials cred, HttpServletResponse response){
-		return sR.tweetNullCheck(tS.repost(id, cred), response);
+		return servletResponse.tweetNullCheck(tweetService.repost(id, cred), response);
 	}
 	
 	@GetMapping("{id}/likes")
 	public List<UserDto> getTweetLikers(@PathVariable Integer id, HttpServletResponse response){
-		return sR.listOfUsersNullCheck(tS.getTweetLikers(id), response);
+		return servletResponse.listOfUsersNullCheck(tweetService.getTweetLikers(id), response);
 	}
 	
 	@GetMapping("{id}/replies")
 	public List<TweetDto> getReplies(@PathVariable Integer id, HttpServletResponse response){
-		return sR.listOfTweetsNullCheck(tS.getReplies(id), response);
+		return servletResponse.listOfTweetsNullCheck(tweetService.getReplies(id), response);
 	}
 	
 	@GetMapping("{id}/reposts")
 	public List<TweetDto> getReposts(@PathVariable Integer id, HttpServletResponse response){
-		return sR.listOfTweetsNullCheck(tS.getRepsots(id), response);
+		return servletResponse.listOfTweetsNullCheck(tweetService.getRepsots(id), response);
 	}
 	
 	@GetMapping("{id}/mentions")
 	public List<UserDto> getMentions(@PathVariable Integer id, HttpServletResponse response){
-		return sR.listOfUsersNullCheck(tS.getMentions(id), response);
+		return servletResponse.listOfUsersNullCheck(tweetService.getMentions(id), response);
 	}
 	
 	@GetMapping("{id}/context")
 	public Context getContext(@PathVariable Integer id, HttpServletResponse response){
-		return tS.getContext(id);
+		return tweetService.getContext(id);
 	}
 
 }

@@ -24,51 +24,46 @@ import com.cooksys.secondassessment.twitterapi.repository.UserRepository;
 @Service
 public class TweetService {
 	
-	private TweetMapper tM;
-	private UserRepository uR;
-	private TweetRepository tR;
-	private UserMapper uM;
-	private TweetFactory tC;
-	private ContextFactory cF;
+	private TweetMapper tweetMapper;
+	private UserRepository userRepository;
+	private TweetRepository tweetRepository;
+	private UserMapper userMapper;
+	private TweetFactory tweetFactory;
+	private ContextFactory contextFactory;
 
-	public TweetService(TweetMapper tM,  UserRepository uR, TweetRepository tR, UserMapper uM, TweetFactory tC, ContextFactory cF) {
-		this.tM = tM;
-		this.uR = uR;
-		this.tR = tR;
-		this.uM = uM;
-		this.tC = tC;
-		this.cF = cF;
+	public TweetService(TweetMapper tweetMapper,  UserRepository userRepository, TweetRepository tweetRepository, UserMapper userMapper, TweetFactory tweetFactory, ContextFactory contextFactory) {
+		this.tweetMapper = tweetMapper;
+		this.userRepository = userRepository;
+		this.tweetRepository = tweetRepository;
+		this.userMapper = userMapper;
+		this.tweetFactory = tweetFactory;
+		this.contextFactory = contextFactory;
 	}
 
 
 	public List<TweetDto> getAll() {		//!
-		return tM.tweetsToTweetDtos(tR.findByDeleted(false));
+		return tweetMapper.tweetsToTweetDtos(tweetRepository.findByDeleted(false));
 	}
 
 	public TweetDto postTweet(TweetInput tweetInput) {
-		if(uR.findByCredentialsAndDeleted(tweetInput.getCredentials(), false)!=null){
-		return tM.tweetToTweetDto(tC.createTweet(tweetInput));
+		if(userRepository.findByCredentialsAndDeleted(tweetInput.getCredentials(), false)!=null){
+		return tweetMapper.tweetToTweetDto(tweetFactory.createTweet(tweetInput));
 		}return null;
 	}
 
 	public TweetDto getThatTweet(Integer id) {		//!
-		return tM.tweetToTweetDto(tR.findByIdAndDeletedAndAuthorDeleted(id,false,false));
+		return tweetMapper.tweetToTweetDto(tweetRepository.findByIdAndDeletedAndAuthorDeleted(id,false,false));
 	}
 
 	@Transactional
 	public TweetDto deleteThisCrap(Integer id, Credentials cred) {		//!
-		Tweet tweet = tR.findByAuthorCredentialsAndIdAndDeletedAndAuthorDeleted(cred, id,false,false);
-		if(tweet!=null){
-			tweet.setDeleted(true);
-			return tM.tweetToTweetDto(tweet);
-		}
-		return null;
+			return tweetMapper.tweetToTweetDto(tweetFactory.deleteTweet(id, cred));
 	}
 
 	@Transactional
 	public boolean like(Integer id, Credentials cred) {		//!
-		Tweet tweet = tR.findByIdAndDeletedAndAuthorDeleted(id, false,false);
-		Users user = uR.findByCredentialsAndDeleted(cred, false);
+		Tweet tweet = tweetRepository.findByIdAndDeletedAndAuthorDeleted(id, false,false);
+		Users user = userRepository.findByCredentialsAndDeleted(cred, false);
 		if(tweet!=null && user!=null){
 				tweet.getLikedBy().add(user);
 				user.getLiked().add(tweet);
@@ -80,76 +75,76 @@ public class TweetService {
 
 	@Transactional
 	public TweetDto reply(Integer id, TweetInput tweetIn) {
-		if(uR.findByCredentialsAndDeleted(tweetIn.getCredentials(), false)==null) return null;
+		if(userRepository.findByCredentialsAndDeleted(tweetIn.getCredentials(), false)==null) return null;
 		Tweet tweet;
-		Tweet inReplyTo = tR.findByIdAndDeletedAndAuthorDeleted(id,false,false);
+		Tweet inReplyTo = tweetRepository.findByIdAndDeletedAndAuthorDeleted(id,false,false);
 		if(inReplyTo!=null){
-				tweet = tC.createTweet(tweetIn);
-				tR.saveAndFlush(tweet);
+				tweet = tweetFactory.createTweet(tweetIn);
+				tweetRepository.saveAndFlush(tweet);
 				inReplyTo.getReplies().add(tweet);
 				tweet.setInReplyTo(inReplyTo);
-			return tM.tweetToTweetDto(tweet);
+			return tweetMapper.tweetToTweetDto(tweet);
 		}
 		return null;
 	}
 	
 	@Transactional
 	public TweetDto repost(Integer id, Credentials cred) {		//!
-		Users user = uR.findByCredentialsAndDeleted(cred, false);
-		Tweet tweet = tR.findByIdAndDeletedAndAuthorDeleted(id, false,false);
+		Users user = userRepository.findByCredentialsAndDeleted(cred, false);
+		Tweet tweet = tweetRepository.findByIdAndDeletedAndAuthorDeleted(id, false,false);
 		
 		TweetInput input = new TweetInput();				//Zamenit' na norm Tweet Factory
 		input.setCredentials(cred);								//Need credentials check
 		input.setContent("");
 		Tweet repost;
 		if(tweet!=null && user!=null){
-			repost = tC.createTweet(input);
+			repost = tweetFactory.createTweet(input);
 			repost.setRepostOf(tweet);
-			tR.saveAndFlush(repost);
-			return tM.tweetToTweetDto(repost);
+			tweetRepository.saveAndFlush(repost);
+			return tweetMapper.tweetToTweetDto(repost);
 		}
 		return null;
 	}
 	
 	public List<UserDto> getTweetLikers(Integer id) {
-		if(tR.findByIdAndDeletedAndAuthorDeleted(id, false,false)!=null){
-			return uM.usersToUsersDto(uR.findByDeletedAndLikedId(false,id)); //HZ ne testil (mozhno sozdat' List  of likers on Tweet esli eto ne budet rabotat')
+		if(tweetRepository.findByIdAndDeletedAndAuthorDeleted(id, false,false)!=null){
+			return userMapper.usersToUsersDto(userRepository.findByDeletedAndLikedId(false,id)); //HZ ne testil (mozhno sozdat' List  of likers on Tweet esli eto ne budet rabotat')
 		}
 		return null;
 	}
 	
 	public List<TweetDto> getReplies(Integer id) {
-		Tweet tweet = tR.findByIdAndDeletedAndAuthorDeleted(id, false,false);
+		Tweet tweet = tweetRepository.findByIdAndDeletedAndAuthorDeleted(id, false,false);
 		if(tweet!=null){
-			return tM.tweetsToTweetDtos(tweet.getReplies());
+			return tweetMapper.tweetsToTweetDtos(tweet.getReplies());
 		}
 		return null;
 	}
 	
 	public List<TweetDto> getRepsots(Integer id) {		//!
-		Tweet tweet = tR.findByIdAndDeletedAndAuthorDeleted(id, false,false);
+		Tweet tweet = tweetRepository.findByIdAndDeletedAndAuthorDeleted(id, false,false);
 		if(tweet!=null){
-			return tM.tweetsToTweetDtos(tR.findByRepostOf(tweet));
+			return tweetMapper.tweetsToTweetDtos(tweetRepository.findByRepostOf(tweet));
 		}
 		return null;
 	}
 	
 	public List<UserDto> getMentions(Integer id) {
-		Tweet tweet = tR.findByIdAndDeletedAndAuthorDeleted(id, false, false);
+		Tweet tweet = tweetRepository.findByIdAndDeletedAndAuthorDeleted(id, false, false);
 		if(tweet==null) return null;
 		List<String> usernames = new ArrayList<>();			//Ugly !!!!!!!!!!
 		for(Mention x : tweet.getMentions()){
 			usernames.add(x.getMention().substring(1));
 		}		
-		return uM.usersToUsersDto(uR.findByUsernameInAndDeleted(usernames, false));
+		return userMapper.usersToUsersDto(userRepository.findByUsernameInAndDeleted(usernames, false));
 	}
 	
 	public Context getContext(Integer id) {
-		return cF.getContext(id);
+		return contextFactory.getContext(id);
 	}
 	
 	public  List<TweetDto> authorTweets(String username){		//!
-		return tM.tweetsToTweetDtos(tR.findByAuthorUsernameAndDeleted(username, false));
+		return tweetMapper.tweetsToTweetDtos(tweetRepository.findByAuthorUsernameAndDeleted(username, false));
 	}
 
 

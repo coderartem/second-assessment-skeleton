@@ -7,7 +7,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.cooksys.secondassessment.twitterapi.entity.Credentials;
 import com.cooksys.secondassessment.twitterapi.entity.Hashtag;
 import com.cooksys.secondassessment.twitterapi.entity.Mention;
 import com.cooksys.secondassessment.twitterapi.entity.Tweet;
@@ -22,65 +24,82 @@ import com.cooksys.secondassessment.twitterapi.repository.UserRepository;
 @Component
 public class TweetFactory {
 	
-	private UserRepository uR;
-	private TweetRepository tR;
-	private HashTagRepository hR;
-	private MentionRepsoitory mR;
+	private UserRepository userRepository;
+	private TweetRepository tweetRepository;
+	private HashTagRepository hashTagRepository;
+	private MentionRepsoitory mentionRepsoitory;
 	
-	public TweetFactory( UserRepository uR, TweetRepository tR, HashTagRepository hR, MentionRepsoitory mR) {
-		this.uR = uR;
-		this.tR = tR;
-		this.hR = hR;
-		this.mR = mR;
+	public TweetFactory( UserRepository userRepository, TweetRepository tweetRepository, HashTagRepository hashTagRepository, MentionRepsoitory mentionRepsoitory) {
+		this.userRepository = userRepository;
+		this.tweetRepository = tweetRepository;
+		this.hashTagRepository = hashTagRepository;
+		this.mentionRepsoitory = mentionRepsoitory;
 	}
 	
 	public Tweet createTweet(TweetInput tweetIn){
 			Tweet tweet = new Tweet();
-			Users user = uR.findByCredentialsAndDeleted(tweetIn.getCredentials(), false);
+			Users user = userRepository.findByCredentialsAndDeleted(tweetIn.getCredentials(), false);
 			if(user==null) return null;
 			
 			tweet.setAuthor(user); 
 			tweet.setPosted(new Timestamp(System.currentTimeMillis()).getTime());
 			tweet.setContent(tweetIn.getContent());
 			tweet.setDeleted(false);
+			tweet.setHashtag(tagsCheck(tweetIn.getContent()));
+			tweet.setMentions(mentionsCheck(tweetIn.getContent()));
 			
-			Matcher hashTag = Pattern.compile("#(\\w+)").matcher(tweetIn.getContent());
-			List<Hashtag> hL = new ArrayList<>();
-			while(hashTag.find()){
-				Hashtag hstg = hR.findByLabel(hashTag.group());
-				if(hstg!=null){
-					hstg.setLastUsed(new Timestamp(System.currentTimeMillis()).getTime());
-					hL.add(hstg);
-				}else{
-					
-					Hashtag hshtg = new Hashtag();
-					hshtg.setLabel(hashTag.group());
-					hshtg.setLastUsed(hshtg.getFirstUsed());
-					hR.saveAndFlush(hshtg);
-					hL.add(hshtg);
-				}
-			}
-			tweet.setHashtag(hL);
-			
-			List<Mention> mL = new ArrayList<>();
-			Matcher mention = Pattern.compile("@(\\w+)").matcher(tweetIn.getContent());
-			while(mention.find()){
-				
-				Mention mn = mR.findByMention(mention.group());
-				if(mn!=null){
-					mL.add(mn);
-				}else{
-					Mention men = new Mention();
-					men.setMention(mention.group());
-					mR.saveAndFlush(men);
-					mL.add(men);
-				}
-			}
-			
-			tweet.setMentions(mL);
-			tR.saveAndFlush(tweet);
+			tweetRepository.saveAndFlush(tweet);
 			
 		return tweet;
 	}
-
+	
+	public List<Hashtag> tagsCheck(String content){
+		
+		Matcher hashTag = Pattern.compile("#(\\w+)").matcher(content);
+		List<Hashtag> hL = new ArrayList<>();
+		while(hashTag.find()){
+			Hashtag existingHashtag = hashTagRepository.findByLabel(hashTag.group());
+			if(existingHashtag!=null){
+				existingHashtag.setLastUsed(new Timestamp(System.currentTimeMillis()).getTime());
+				hL.add(existingHashtag);
+			}else{
+				
+				Hashtag newHashtag = new Hashtag();
+				newHashtag.setLabel(hashTag.group());
+				newHashtag.setLastUsed(newHashtag.getFirstUsed());
+				hashTagRepository.saveAndFlush(newHashtag);
+				hL.add(newHashtag);
+			}
+	}
+		return hL;
+	}
+	
+	public List<Mention> mentionsCheck(String content){
+		
+		Matcher mention = Pattern.compile("@(\\w+)").matcher(content);
+		List<Mention> mentionsList = new ArrayList<>();
+		while(mention.find()){
+			
+			Mention existingMention = mentionRepsoitory.findByMention(mention.group());
+			if(existingMention!=null){
+				mentionsList.add(existingMention);
+			}else{
+				Mention newMention = new Mention();
+				newMention.setMention(mention.group());
+				mentionRepsoitory.saveAndFlush(newMention);
+				mentionsList.add(newMention);
+			}
+	}
+		return mentionsList;
+	}
+	
+	@Transactional
+	public Tweet deleteTweet(Integer id, Credentials cred){
+		Tweet tweet = tweetRepository.findByAuthorCredentialsAndIdAndDeletedAndAuthorDeleted(cred, id,false,false);
+		if(tweet!=null){
+			tweet.setDeleted(true);
+			return tweet;
+		}
+		return null;
+	}
 }

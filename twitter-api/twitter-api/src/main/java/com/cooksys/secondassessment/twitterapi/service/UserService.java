@@ -23,61 +23,52 @@ import com.cooksys.secondassessment.twitterapi.repository.UserRepository;
 @Service
 public class UserService {
 
-	private UserRepository uR;
-	private UserMapper uM;  
-	private TweetRepository tR;
-	private TweetService tS;
-	private UserFactory cI;
-	private TweetMapper tM;
+	private UserRepository userRepository;
+	private UserMapper userMapper;  
+	private TweetRepository tweetRepository;
+	private TweetService tweetService;
+	private UserFactory usersFactory;
+	private TweetMapper tweetMapper;
 
-	public UserService(UserRepository userRepository, UserMapper uM, TweetRepository tR, TweetService tS, UserFactory cI, TweetMapper tM) {
-		this.uR=userRepository;
-		this.uM = uM;
-		this.tR = tR;
-		this.tS = tS;
-		this.cI = cI;
-		this.tM = tM;
+	public UserService(UserRepository userRepository, UserMapper userMapper, TweetRepository tweetRepository, TweetService tweetService, UserFactory usersFactory, TweetMapper tweetMapper) {
+		this.userRepository=userRepository;
+		this.userMapper = userMapper;
+		this.tweetRepository = tweetRepository;
+		this.tweetService = tweetService;
+		this.usersFactory = usersFactory;
+		this.tweetMapper = tweetMapper;
 	}
 	
 	
 	public UserDto getThatUser(String username){
-		return uM.userToUserDto(uR.findByUsernameAndDeleted(username, false));
+		return userMapper.userToUserDto(userRepository.findByUsernameAndDeleted(username, false));
 	}
 
 	public UserDto createNewUser(InputDto input) {
-		Users user = cI.getUser(input); 
-		if(user!=null){
-		return getThatUser(user.getUsername());
-		}return null;
+		return userMapper.userToUserDto(usersFactory.createUser(input));
 	}
 
 	public List<UserDto> getAllUsers() {
-		return uM.usersToUsersDto(uR.findByDeleted(false));
+		return userMapper.usersToUsersDto(userRepository.findByDeleted(false));
 	}
 
 
 	@Transactional
 	public UserDto deleteThisMF(String username) {
-		Users user = uR.findByUsernameAndDeleted(username, false);
-		if(user==null) return null;
-		user.setDeleted(true);
-		for(Tweet x : tR.findByAuthorUsernameAndDeleted(user.getUsername(), false)){
-			x.setDeleted(true);
-		}
-		return uM.userToUserDto(user);
+		return userMapper.userToUserDto(usersFactory.deleteUser(username));
 	}
 
 	
 	public UserDto updateThisMF(String username, InputDto input) {
-		Users user = cI.patchUser(input);
-		return uM.userToUserDto(user);
+		Users user = usersFactory.patchUser(input);
+		return userMapper.userToUserDto(user);
 	}
 
 	@Transactional
 	public boolean followHim(String username, Credentials cred) {
-			Users user = uR.findByUsernameAndDeleted(username, false);
-			Users follower = uR.findByCredentialsAndDeleted(cred, false);
-			if(user!=null && follower!=null && uR.findByUsernameAndFollowersCredentials(user.getUsername(), follower.getCredentials())==null && follower!=user){
+			Users user = userRepository.findByUsernameAndDeleted(username, false);
+			Users follower = userRepository.findByCredentialsAndDeleted(cred, false);
+			if(user!=null && follower!=null && userRepository.findByUsernameAndFollowersCredentials(user.getUsername(), follower.getCredentials())==null && follower!=user){
 				user.getFollowers().add(follower);
 				follower.getFollowing().add(user);
 				return true;
@@ -86,9 +77,9 @@ public class UserService {
 
 	@Transactional
 	public boolean unfollowHim(String username, Credentials cred) {
-		Users user = uR.findByUsernameAndDeleted(username, false);
-		Users follower = uR.findByCredentialsAndDeleted(cred, false);
-		if(user!=null && follower!=null && uR.findByUsernameAndFollowersCredentials(user.getUsername(), follower.getCredentials())!=null){
+		Users user = userRepository.findByUsernameAndDeleted(username, false);
+		Users follower = userRepository.findByCredentialsAndDeleted(cred, false);
+		if(user!=null && follower!=null && userRepository.findByUsernameAndFollowersCredentials(user.getUsername(), follower.getCredentials())!=null){
 			user.getFollowers().remove(follower);
 			follower.getFollowing().remove(user);
 			return true;
@@ -98,12 +89,12 @@ public class UserService {
 
 	public List<TweetDto> getFeed(String username) {
 
-		Users user = uR.findByUsernameAndDeleted(username, false);				//Adjust  
+		Users user = userRepository.findByUsernameAndDeleted(username, false);				//Adjust  
 		List<TweetDto> res=new ArrayList<>();					//Mogut byt dublikaty tweetov !!!
 		if(user!=null){											//Need sorting
-			res.addAll(tS.authorTweets(username));
+			res.addAll(tweetService.authorTweets(username));
 			for(Users x : user.getFollowing()){
-				res.addAll(tS.authorTweets(x.getUsername()));
+				res.addAll(tweetService.authorTweets(x.getUsername()));
 			}
 			return res;
 		}
@@ -111,31 +102,29 @@ public class UserService {
 	}
 	
 	public List<TweetDto> getTweets(String username){				//Still need to sort
-		Users user = uR.findByUsernameAndDeleted(username, false);
+		Users user = userRepository.findByUsernameAndDeleted(username, false);
 		if(user!=null){ 
-			return  tS.authorTweets(username);
+			return  tweetService.authorTweets(username);
 		}
 		return null;
-		
 	}
 
-
 	public List<UserDto> whoAmIFollowing(String username) {
-		List<Users> following = uR.findByUsernameAndDeleted(username, false).getFollowing();
+		List<Users> following = userRepository.findByUsernameAndDeleted(username, false).getFollowing();
 		following.removeIf(t->t.isDeleted()==true);
-		return uM.usersToUsersDto(following);
+		return userMapper.usersToUsersDto(following);
 	}
 
 
 	public List<UserDto> myFanClub(String username) {
-		List<Users> followers = uR.findByUsernameAndDeleted(username, false).getFollowers();
+		List<Users> followers = userRepository.findByUsernameAndDeleted(username, false).getFollowers();
 		followers.removeIf(t->t.isDeleted()==true);
-		return uM.usersToUsersDto(followers);
+		return userMapper.usersToUsersDto(followers);
 	}
 
 
 	public List<TweetDto> whereUserMentioned(String username) {
-		return tM.tweetsToTweetDtos(tR.findByDeletedAndMentionsMention(false, "@"+username));
+		return tweetMapper.tweetsToTweetDtos(tweetRepository.findByDeletedAndMentionsMention(false, "@"+username));
 	}
 	
 	

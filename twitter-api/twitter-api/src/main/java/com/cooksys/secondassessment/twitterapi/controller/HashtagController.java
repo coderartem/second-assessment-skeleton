@@ -15,20 +15,20 @@ import com.cooksys.secondassessment.twitterapi.service.HashtagService;
 @RequestMapping("tag")
 public class HashtagController {
 	
-	private HashtagService tagS;
+	private HashtagService tagService;
 
-	public HashtagController(HashtagService tagS) {
-		this.tagS = tagS;
+	public HashtagController(HashtagService tagService) {
+		this.tagService = tagService;
 	}
 	
 	@GetMapping
 	public List<Hashtag> getAllTags(){
-		return tagS.getAllTags();
+		return tagService.getAllTags();
 	}
 	
 	@GetMapping("{label}")
 	public List<TweetDto> getAllTweetsWithTag(@PathVariable String label){
-		return tagS.getAllTweetsWithTag(label);
+		return tagService.getAllTweetsWithTag(label);
 	}
 
 }

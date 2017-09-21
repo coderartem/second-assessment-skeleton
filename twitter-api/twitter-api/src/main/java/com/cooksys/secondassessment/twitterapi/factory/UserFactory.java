@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.cooksys.secondassessment.twitterapi.entity.Tweet;
 import com.cooksys.secondassessment.twitterapi.entity.Users;
 import com.cooksys.secondassessment.twitterapi.input.dto.InputDto;
+import com.cooksys.secondassessment.twitterapi.mapper.UserMapper;
 import com.cooksys.secondassessment.twitterapi.repository.TweetRepository;
 import com.cooksys.secondassessment.twitterapi.repository.UserRepository;
 
@@ -15,50 +16,47 @@ import com.cooksys.secondassessment.twitterapi.repository.UserRepository;
 @Component
 public class UserFactory {
 
-	private UserRepository uR;
-	private TweetRepository tR;
+	private UserRepository userRepository;
+	private TweetRepository tweetRepository;
 
-	public UserFactory(UserRepository uR, TweetRepository tR) {
-		this.uR = uR;
-		this.tR = tR;
-		
+	public UserFactory(UserRepository userRepository, TweetRepository tweetRepository) {
+		this.userRepository = userRepository;
+		this.tweetRepository = tweetRepository;
 	}
 		
-	public Users getUser(InputDto input){
+	public Users createUser(InputDto input){
 		
-		if(uR.findByCredentialsAndDeleted(input.getCredentials(),true)!=null){
-			reactivateUser(input.getCredentials().getUsername());
-			System.out.println(input.getCredentials().getUsername());
-			System.out.println(uR.findByCredentialsAndDeleted(input.getCredentials(), false)!=null);
-			return uR.findByCredentialsAndDeleted(input.getCredentials(), false);  //pomenyal na AndDeleted 9.21 10.21am
+		if(userRepository.findByCredentialsAndDeleted(input.getCredentials(),true)!=null){
+			Users user = reactivateUser(input.getCredentials().getUsernam());
+			userRepository.saveAndFlush(user);
+			return userRepository.findByCredentialsAndDeleted(input.getCredentials(), false);
 		}
-		if(uR.findByUsername(input.getCredentials().getUsername())!=null){
+		if(userRepository.findByUsername(input.getCredentials().getUsernam())!=null){
 			return null;
 		}
 			Users user = new Users();
-			user.setUsername(input.getCredentials().getUsername());
+			user.setUsername(input.getCredentials().getUsernam());
 			user.setProfile(input.getProfile());
 			user.setJoined(new Timestamp(System.currentTimeMillis()).getTime());
 			user.setCredentials(input.getCredentials());
 			user.setDeleted(false);
-			uR.saveAndFlush(user);
+			userRepository.saveAndFlush(user);
 		return user;
 	}
 	
 	@Transactional
-	public void reactivateUser(String usernam) {
-		System.out.println("Lol");
-		Users user = uR.findByUsername(usernam);
+	public Users reactivateUser(String usernam) {
+		Users user = userRepository.findByUsername(usernam);
 		user.setDeleted(false);
-		for(Tweet x : tR.findByAuthorUsernameAndDeleted(user.getUsername(), true)){
+		for(Tweet x : tweetRepository.findByAuthorUsernameAndDeleted(user.getUsername(), true)){
 			x.setDeleted(false);
 		}
-		System.out.println("finish");
+		return user;
 	}
 	
 	@Transactional
 	public Users patchUser(InputDto input){
-		Users user = uR.findByCredentialsAndDeleted(input.getCredentials(), false);
+		Users user = userRepository.findByCredentialsAndDeleted(input.getCredentials(), false);
 		
 		if(user!=null){
 			
@@ -77,6 +75,19 @@ public class UserFactory {
 			return user;
 		}
 		return null;
+	}
+	
+	
+	@Transactional
+	public Users deleteUser(String username){
+		Users user = userRepository.findByUsernameAndDeleted(username, false);
+		if(user==null) return null;
+		user.setDeleted(true);
+		for(Tweet x : tweetRepository.findByAuthorUsernameAndDeleted(user.getUsername(), false)){
+			x.setDeleted(true);
+		}
+		
+		return user;
 	}
 	
 	

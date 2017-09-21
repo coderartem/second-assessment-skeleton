@@ -13,22 +13,22 @@ import com.cooksys.secondassessment.twitterapi.repository.TweetRepository;
 @Service
 public class HashtagService {
 
-	private HashTagRepository hR;
-	private TweetRepository tR;
-	private TweetMapper tM;
+	private HashTagRepository hashTagRepository;
+	private TweetRepository tweetRepository;
+	private TweetMapper tweetMapper;
 
-	public HashtagService(HashTagRepository hR, TweetRepository tR, TweetMapper tM) {
-		this.hR = hR;
-		this.tR = tR;
-		this.tM = tM;
+	public HashtagService(HashTagRepository hashTagRepository, TweetRepository tweetRepository, TweetMapper tweetMapper) {
+		this.hashTagRepository = hashTagRepository;
+		this.tweetRepository = tweetRepository;
+		this.tweetMapper = tweetMapper;
 	}
 
 	public List<Hashtag> getAllTags() {
-		return hR.findAll();
+		return hashTagRepository.findAll();
 	}
 
 	public List<TweetDto> getAllTweetsWithTag(String label) {
-		return tM.tweetsToTweetDtos(tR.findByDeletedAndHashtagLabel(false, label));
+		return tweetMapper.tweetsToTweetDtos(tweetRepository.findByDeletedAndHashtagLabel(false, label));
 	}
 	
 	
