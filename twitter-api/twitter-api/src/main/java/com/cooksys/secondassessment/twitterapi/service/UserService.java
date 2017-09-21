@@ -8,7 +8,7 @@ import javax.persistence.EntityManager;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.cooksys.secondassessment.twitterapi.converter.ConvertInput;
+import com.cooksys.secondassessment.twitterapi.cfactory.UserFactory;
 import com.cooksys.secondassessment.twitterapi.dto.TweetDto;
 import com.cooksys.secondassessment.twitterapi.dto.UserDto;
 import com.cooksys.secondassessment.twitterapi.entity.Credentials;
@@ -24,17 +24,15 @@ import com.cooksys.secondassessment.twitterapi.repository.UserRepository;
 public class UserService {
 
 	private UserRepository uR;
-	private UserMapper uM;
-	private EntityManager eM;   //Vozmozhno ne nuzhen
+	private UserMapper uM;  
 	private TweetRepository tR;
 	private TweetService tS;
-	private ConvertInput cI;
+	private UserFactory cI;
 	private TweetMapper tM;
 
-	public UserService(UserRepository userRepository, UserMapper uM, EntityManager eM, TweetRepository tR, TweetService tS, ConvertInput cI, TweetMapper tM) {
+	public UserService(UserRepository userRepository, UserMapper uM, TweetRepository tR, TweetService tS, UserFactory cI, TweetMapper tM) {
 		this.uR=userRepository;
 		this.uM = uM;
-		this.eM = eM;
 		this.tR = tR;
 		this.tS = tS;
 		this.cI = cI;
@@ -47,9 +45,8 @@ public class UserService {
 	}
 
 	public UserDto createNewUser(InputDto input) {
-		Users user = cI.getUser(input);  ////Zamenit' na Mapper
+		Users user = cI.getUser(input); 
 		if(user!=null){
-			uR.saveAndFlush(user);
 		return getThatUser(user.getUsername());
 		}return null;
 	}
@@ -71,46 +68,39 @@ public class UserService {
 	}
 
 	
-	@Transactional
 	public UserDto updateThisMF(String username, InputDto input) {
-		
-		Users user = cI.getUser(input);
-		Users oldUser = uR.findByCredentials(input.getCredentials());
-		if(oldUser!=null){
-			
-			//Some PATCH Code Here
-		}
-		return null;
+		Users user = cI.patchUser(input);
+		return uM.userToUserDto(user);
 	}
 
 	@Transactional
-	public int followHim(String username, Credentials cred) {
+	public boolean followHim(String username, Credentials cred) {
 			Users user = uR.findByUsernameAndDeleted(username, false);
 			Users follower = uR.findByCredentialsAndDeleted(cred, false);
 			if(user!=null && follower!=null && uR.findByUsernameAndFollowersCredentials(user.getUsername(), follower.getCredentials())==null){
 				user.getFollowers().add(follower);
 				follower.getFollowing().add(user);
-				return 1;
-			}else return 0;
+				return true;
+			}else return false;
 	}
 
 	@Transactional
-	public int unfollowHim(String username, Credentials cred) {
+	public boolean unfollowHim(String username, Credentials cred) {
 		Users user = uR.findByUsername(username);
 		Users follower = uR.findByCredentials(cred);
 		if(user!=null && follower!=null && uR.findByUsernameAndFollowersCredentials(user.getUsername(), follower.getCredentials())!=null){
 			user.getFollowers().remove(follower);
 			follower.getFollowing().remove(user);
-			return 1;
-		}else return 0;
+			return true;
+		}else return false;
 	}
 
 
 	public List<TweetDto> getFeed(String username) {
 
-		Users user = uR.findByUsername(username);				//Adjust  
+		Users user = uR.findByUsernameAndDeleted(username, false);				//Adjust  
 		List<TweetDto> res=new ArrayList<>();					//Mogut byt dublikaty tweetov !!!
-		if(user!=null && !user.isDeleted()){					//Need sorting
+		if(user!=null){											//Need sorting
 			res.addAll(getTweets(username));
 			for(Users x : user.getFollowing()){
 				res.addAll(tS.authorTweets(x.getUsername()));

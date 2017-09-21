@@ -1,12 +1,14 @@
 package com.cooksys.secondassessment.twitterapi.entity;
 
 import javax.persistence.Embeddable;
+import javax.validation.constraints.NotNull;
 
 @Embeddable
 public class Profile {
 	
 	private String firstName;
 	private String lastName;
+	@NotNull
 	private String email;
 	private String phone;
 	

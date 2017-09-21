@@ -1,4 +1,4 @@
-package com.cooksys.secondassessment.twitterapi.converter;
+package com.cooksys.secondassessment.twitterapi.cfactory;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -19,14 +19,14 @@ import com.cooksys.secondassessment.twitterapi.repository.UserRepository;
 
 
 @Component
-public class TweetCreator {
+public class TweetFactory {
 	
 	private UserRepository uR;
 	private TweetRepository tR;
 	private HashTagRepository hR;
 	private MentionRepsoitory mR;
 	
-	public TweetCreator( UserRepository uR, TweetRepository tR, HashTagRepository hR, MentionRepsoitory mR) {
+	public TweetFactory( UserRepository uR, TweetRepository tR, HashTagRepository hR, MentionRepsoitory mR) {
 		this.uR = uR;
 		this.tR = tR;
 		this.hR = hR;
@@ -35,7 +35,9 @@ public class TweetCreator {
 	
 	public Tweet createTweet(TweetInput tweetIn){
 			Tweet tweet = new Tweet();
+			
 			if(uR.findByCredentialsAndDeleted(tweetIn.getCredentials(), false)==null) return null;
+			
 			tweet.setAuthor(uR.findByCredentials(tweetIn.getCredentials())); 
 			tweet.setPosted(new Timestamp(System.currentTimeMillis()).getTime());
 			tweet.setContent(tweetIn.getContent());
@@ -55,8 +57,6 @@ public class TweetCreator {
 					hshtg.setLastUsed(hshtg.getFirstUsed());
 					hR.saveAndFlush(hshtg);
 					hL.add(hshtg);
-					System.out.println("And getHashtag");
-							//HZ dolzhen li ya vmesto etogo dobavit' cherez poisk v DB?
 				}
 			}
 			tweet.setHashtag(hL);
@@ -77,7 +77,8 @@ public class TweetCreator {
 			}
 			
 			tweet.setMentions(mL);
-		
+			tR.saveAndFlush(tweet);
+			
 		return tweet;
 	}
 

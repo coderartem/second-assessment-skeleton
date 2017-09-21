@@ -6,7 +6,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.cooksys.secondassessment.twitterapi.converter.TweetCreator;
+import com.cooksys.secondassessment.twitterapi.cfactory.TweetFactory;
 import com.cooksys.secondassessment.twitterapi.dto.TweetDto;
 import com.cooksys.secondassessment.twitterapi.dto.UserDto;
 import com.cooksys.secondassessment.twitterapi.entity.Credentials;
@@ -26,9 +26,9 @@ public class TweetService {
 	private UserRepository uR;
 	private TweetRepository tR;
 	private UserMapper uM;
-	private TweetCreator tC;
+	private TweetFactory tC;
 
-	public TweetService(TweetMapper tM,  UserRepository uR, TweetRepository tR, UserMapper uM, TweetCreator tC) {
+	public TweetService(TweetMapper tM,  UserRepository uR, TweetRepository tR, UserMapper uM, TweetFactory tC) {
 		this.tM = tM;
 		this.uR = uR;
 		this.tR = tR;
@@ -43,9 +43,7 @@ public class TweetService {
 
 	public TweetDto postTweet(TweetInput tweetInput) {
 		if(uR.findByCredentialsAndDeleted(tweetInput.getCredentials(), false)!=null){
-			Tweet tweet = tC.createTweet(tweetInput);   
-			tR.save(tweet);
-		return tM.tweetToTweetDto(tweet);
+		return tM.tweetToTweetDto(tC.createTweet(tweetInput));
 		}return null;
 	}
 
@@ -70,7 +68,7 @@ public class TweetService {
 		if(tweet!=null && user!=null){
 				tweet.getLikedBy().add(user);
 				user.getLiked().add(tweet);
-				return 1;
+			return 1;
 		}
 		return 0;
 		
@@ -82,10 +80,10 @@ public class TweetService {
 		Tweet tweet;
 		Tweet inReplyTo = tR.findByIdAndDeletedAndAuthorDeleted(id,false,false);
 		if(inReplyTo!=null){
-			tweet = tC.createTweet(tweetIn);
-			tR.saveAndFlush(tweet);
-			inReplyTo.getReplies().add(tweet);
-			tweet.setInReplyTo(inReplyTo);
+				tweet = tC.createTweet(tweetIn);
+				tR.saveAndFlush(tweet);
+				inReplyTo.getReplies().add(tweet);
+				tweet.setInReplyTo(inReplyTo);
 			return tM.tweetToTweetDto(tweet);
 		}
 		return null;
@@ -118,15 +116,7 @@ public class TweetService {
 	
 	public List<TweetDto> getReplies(Integer id) {
 		Tweet tweet = tR.findByIdAndDeletedAndAuthorDeleted(id, false,false);
-//		List<TweetDto> res = new ArrayList<>();
 		if(tweet!=null){
-			
-//			List<Tweet> parrent = tR.findByInReplyTo(tweet);			//Other way
-//			for(Tweet x : parrent){
-//				res.add(tM.tweetToTweetDto(x.getInReplyTo()));
-//			}
-//			return res;
-			
 			return tM.tweetsToTweetDtos(tweet.getReplies());
 		}
 		return null;
