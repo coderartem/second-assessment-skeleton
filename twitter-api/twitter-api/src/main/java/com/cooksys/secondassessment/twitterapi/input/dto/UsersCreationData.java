@@ -3,7 +3,15 @@ package com.cooksys.secondassessment.twitterapi.input.dto;
 import com.cooksys.secondassessment.twitterapi.entity.Credentials;
 import com.cooksys.secondassessment.twitterapi.entity.Profile;
 
-public class InputDto {
+/**
+ * 
+ * @author Artem Kolin
+ * 
+ * Dto for input JSON object that contain users creation data: Profile and Credentials 
+ *
+ */
+
+public class UsersCreationData {
 	
 	private Profile profile;
 	private Credentials credentials;

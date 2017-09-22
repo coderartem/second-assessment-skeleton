@@ -9,6 +9,13 @@ import com.cooksys.secondassessment.twitterapi.dto.UserDto;
 import com.cooksys.secondassessment.twitterapi.entity.Hashtag;
 import com.cooksys.secondassessment.twitterapi.entity.Mention;
 
+/**
+ * 
+ * @author Artem Kolin
+ * 
+ * This component serves as sorter of output lists of TweetDto, UserDto, Hashtag and Mention objects
+ *
+ */
 @Component
 public class Sorter {
 	
@@ -29,7 +36,7 @@ public class Sorter {
 	}
 	
 	public List<Mention> sortMentions(List<Mention> mentions){
-		mentions.sort((a,b)->b.getId().compareTo(a.getId()));
+		mentions.sort((a,b)->a.getMention().compareTo(b.getMention()));
 		return mentions;
 	}
 

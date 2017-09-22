@@ -1,11 +1,19 @@
 package com.cooksys.secondassessment.twitterapi.dto;
 
 
+/**
+ * 
+ * @author Artem Kolin
+ * 
+ * This Dto designed to be used inside of repost and reply Tweets to avoid inner loops if inner Tweets have their own inner repost to or reply to Tweets and so on  
+ *
+ */
+
 public class SimpleTweetDto {
 	
 	private Integer id;
-	private UserDto author;
 	private Long posted;
+	private UserDto author;
 	private String content;
 	
 	

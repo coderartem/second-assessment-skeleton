@@ -13,7 +13,6 @@ public interface UserRepository extends JpaRepository<Users,Integer> {
 	Users findByUsernameAndDeleted(String username, Boolean deleted);
 	Users findByUsername(String username);
 	Users findByCredentialsAndDeleted(Credentials cred, Boolean deleted);
-	List<Users> findByUsernameAndFollowingDeleted (String username,Boolean deleted);
 	List<Users> findByDeletedAndLikedId(Boolean deleted, Integer id);
 	Users findByUsernameAndFollowersCredentials(String username, Credentials cred);
 	List<Users> findByUsernameInAndDeleted(List<String> usernames, Boolean deleted);

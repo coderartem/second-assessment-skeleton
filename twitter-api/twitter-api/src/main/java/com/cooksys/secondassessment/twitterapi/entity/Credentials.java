@@ -4,6 +4,14 @@ import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.validation.constraints.NotNull;
 
+
+/**
+ * 
+ * @author Artem Kolin
+ * 
+ * Dto for UsersCreationData input, also Embedded into Users Entity as user Credentials (login and password)
+ *
+ */
 @Embeddable
 public class Credentials {
 	

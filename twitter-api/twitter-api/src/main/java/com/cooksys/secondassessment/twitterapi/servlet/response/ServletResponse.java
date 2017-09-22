@@ -10,6 +10,14 @@ import com.cooksys.secondassessment.twitterapi.dto.TweetDto;
 import com.cooksys.secondassessment.twitterapi.dto.UserDto;
 import com.cooksys.secondassessment.twitterapi.entity.Hashtag;
 
+
+/**
+ * 
+ * @author Artem Kolin
+ * 
+ * This component created to set HttpServletResponse to 404 NOT FOUND in case of null returned on user request
+ *
+ */
 @Component
 public class ServletResponse {
 	

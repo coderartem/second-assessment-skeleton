@@ -2,11 +2,19 @@ package com.cooksys.secondassessment.twitterapi.dto;
 
 import com.cooksys.secondassessment.twitterapi.entity.Profile;
 
+
+/**
+ * 
+ * @author Artem Kolin
+ * 
+ * User Dto for output
+ *
+ */
 public class UserDto {
 	
 	private String username;
-	private Profile profile;
 	private Long joined;
+	private Profile profile;
 	
 	
 	public String getUsername() {

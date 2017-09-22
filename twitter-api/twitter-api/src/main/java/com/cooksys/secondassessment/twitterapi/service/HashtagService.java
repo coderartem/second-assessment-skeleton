@@ -10,7 +10,14 @@ import com.cooksys.secondassessment.twitterapi.factory.Sorter;
 import com.cooksys.secondassessment.twitterapi.mapper.TweetMapper;
 import com.cooksys.secondassessment.twitterapi.repository.HashTagRepository;
 import com.cooksys.secondassessment.twitterapi.repository.TweetRepository;
-
+/**
+ * 
+ * @author Artem Kolin
+ * 
+ * Names of methods are pretty informative themselves
+ * Implementing everywhere null checks on returned from data base information (Hashtag(s), Tweet(s))
+ * Sending List<> results to Sorter injected component to sort them in DESC order based on timestamps
+ */
 @Service
 public class HashtagService {
 

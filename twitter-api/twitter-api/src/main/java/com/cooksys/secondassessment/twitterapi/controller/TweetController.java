@@ -21,11 +21,16 @@ import com.cooksys.secondassessment.twitterapi.input.dto.TweetInput;
 import com.cooksys.secondassessment.twitterapi.service.TweetService;
 import com.cooksys.secondassessment.twitterapi.servlet.response.ServletResponse;
 
+/**
+ * 
+ * @author Artem Kolin
+ * 
+ * Sending response (not everywhere) from TweetService to ServletResponse component to setup HttpServletResponse to 404 in case returned value is null
+ *
+ */
 @RestController
 @RequestMapping("tweets")
 public class TweetController {
-	
-	
 	
 	private TweetService tweetService;
 	private ServletResponse servletResponse;
@@ -43,7 +48,7 @@ public class TweetController {
 	
 	@PostMapping
 	public TweetDto postTweet (@RequestBody TweetInput tweetInput, HttpServletResponse response){
-		return servletResponse.tweetNullCheck(tweetService.postTweet(tweetInput), response);
+		return servletResponse.tweetNullCheck(tweetService.postNewTweet(tweetInput), response);
 	}
 	
 	@GetMapping("{id}")

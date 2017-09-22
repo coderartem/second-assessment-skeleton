@@ -10,6 +10,13 @@ import com.cooksys.secondassessment.twitterapi.entity.Tweet;
 import com.cooksys.secondassessment.twitterapi.mapper.TweetMapper;
 import com.cooksys.secondassessment.twitterapi.repository.TweetRepository;
 
+/**
+ * 
+ * @author Artem Kolin
+ * 
+ * This component build Context object using stored inside every Tweet object links to inReplyTo tweet and replies to that tweet
+ *
+ */
 
 @Component
 public class ContextFactory {
@@ -49,7 +56,12 @@ public class ContextFactory {
 				sort.sortTweets(tweetMapper.tweetsToTweetDtos(afterList)));
 	}
 	
-	public List<Tweet> before(Tweet tweet){
+	/**
+	 * Using recursion building chain of inReplyTo tweets
+	 * @param tweet
+	 * @return List<Tweet> beforeList
+	 */
+	private List<Tweet> before(Tweet tweet){
 		beforeList.add(tweet);
 		if(tweet.getInReplyTo()==null){
 			return beforeList;
@@ -57,7 +69,12 @@ public class ContextFactory {
 		return before(tweet.getInReplyTo());
 	}
 	
-	public List<Tweet> after(Tweet tweet){
+	/**
+	 * Using recursion building chain of replies to that tweet with all branches flattened together
+	 * @param tweet
+	 * @return List<Tweet> afterList
+	 */
+	private List<Tweet> after(Tweet tweet){
 		afterList.add(tweet);
 		if(tweet.getReplies()!=null){
 			for(Tweet t : tweet.getReplies()){

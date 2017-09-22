@@ -4,6 +4,14 @@ import java.util.List;
 
 import com.cooksys.secondassessment.twitterapi.dto.TweetDto;
 
+/**
+ * 
+ * @author Artem Kolin
+ * 
+ * Dto for Context output
+ *
+ */
+
 public class Context {
 	
 	private TweetDto target;

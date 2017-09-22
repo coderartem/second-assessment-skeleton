@@ -9,6 +9,14 @@ import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 
+/**
+ * 
+ * @author Artem Kolin
+ * 
+ * Tweet Entity
+ *
+ */
+
 @Entity
 public class Tweet {
 
@@ -24,7 +32,7 @@ public class Tweet {
 	private boolean deleted;
 	
 	@ManyToMany
-	private List<Users> likedBy;  //Dvuhstoronka, hz esli budet rabotat', mozhno ot odnoj storony izbavitsya
+	private List<Users> likedBy;
 	
 	@OneToMany   
 	private List<Tweet> replies;

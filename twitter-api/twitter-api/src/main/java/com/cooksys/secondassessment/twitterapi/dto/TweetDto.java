@@ -1,11 +1,18 @@
 package com.cooksys.secondassessment.twitterapi.dto;
 
+/**
+ * 
+ * @author Artem Kolin
+ *
+ *Dto for Tweet output contain SimpleTweetDtos for inReplyTo and repostOf inner Tweet(s) to avoid loops in case of inner 
+ *Tweets have their own reply/repost dependencies on other Tweets and those on their own and so on
+ */
 public class TweetDto {
 	
 	
 	private Integer id;
-	private UserDto author;  //Spring is smart as heck, mapper convert type to typeDto itself
 	private Long posted;
+	private UserDto author;  //Spring is smart as heck, mapper convert type to typeDto itself
 	private String content;
 	
 	private SimpleTweetDto inReplyTo;

@@ -11,8 +11,6 @@ import com.cooksys.secondassessment.twitterapi.service.ValidateService;
 @RequestMapping("validate")
 public class ValidateController {
 
-	
-
 	private ValidateService validateService;
 
 	public ValidateController(ValidateService validateService) {

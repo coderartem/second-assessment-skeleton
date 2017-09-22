@@ -16,10 +16,17 @@ import org.springframework.web.bind.annotation.RestController;
 import com.cooksys.secondassessment.twitterapi.dto.TweetDto;
 import com.cooksys.secondassessment.twitterapi.dto.UserDto;
 import com.cooksys.secondassessment.twitterapi.entity.Credentials;
-import com.cooksys.secondassessment.twitterapi.input.dto.InputDto;
+import com.cooksys.secondassessment.twitterapi.input.dto.UsersCreationData;
 import com.cooksys.secondassessment.twitterapi.service.UserService;
 import com.cooksys.secondassessment.twitterapi.servlet.response.ServletResponse;
 
+/**
+ * 
+ * @author Artem Kolin
+ * 
+ * Sending response (not everywhere) from TweetService to injected ServletResponse component to setup HttpServletResponse to 404 in case returned value is null
+ *
+ */
 @RestController
 @RequestMapping("users")
 public class UserController {
@@ -37,7 +44,7 @@ public class UserController {
 	
 	@GetMapping
 	public List<UserDto> getAllUsers(){
-		return userSrvice.getAllUsers();
+		return userSrvice.getAllActiveUsers();
 	}
 	
 	@GetMapping("/@{username}")
@@ -47,7 +54,7 @@ public class UserController {
 	
 	
 	@PostMapping
-	public UserDto addUser(@RequestBody InputDto input, HttpServletResponse response){
+	public UserDto addUser(@RequestBody UsersCreationData input, HttpServletResponse response){
 		return sResp.userNullCheck(userSrvice.createNewUser(input),response);
 	}
 	
@@ -57,7 +64,7 @@ public class UserController {
 	}
 	
 	@PatchMapping("@{username}")
-	public UserDto updateThisMF(@PathVariable String username, @RequestBody InputDto input, HttpServletResponse response){
+	public UserDto updateThisMF(@PathVariable String username, @RequestBody UsersCreationData input, HttpServletResponse response){
 		return sResp.userNullCheck(userSrvice.updateThisMF(username, input),response);
 	}
 	
@@ -75,17 +82,17 @@ public class UserController {
 	
 	@GetMapping("@{username}/feed")
 	public List<TweetDto> getFeed(@PathVariable String username, HttpServletResponse response){
-		return sResp.listOfTweetsNullCheck(userSrvice.getFeed(username), response);
+		return sResp.listOfTweetsNullCheck(userSrvice.getUserFeed(username), response);
 	}
 	
 	@GetMapping("@{username}/tweets")
 	public List<TweetDto> getTweets(@PathVariable String username, HttpServletResponse response){
-		return sResp.listOfTweetsNullCheck(userSrvice.getTweets(username), response);
+		return sResp.listOfTweetsNullCheck(userSrvice.getUserTweets(username), response);
 	}
 	
 	@GetMapping("@{username}/mentions")
 	public List<TweetDto> getTweetsWithUserMentioned(@PathVariable String username, HttpServletResponse response){
-		return sResp.listOfTweetsNullCheck(userSrvice.whereUserMentioned(username),response);
+		return sResp.listOfTweetsNullCheck(userSrvice.userMentions(username),response);
 	}
 	
 	@GetMapping("@{username}/followers")

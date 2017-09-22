@@ -3,6 +3,13 @@ package com.cooksys.secondassessment.twitterapi.entity;
 import javax.persistence.Embeddable;
 import javax.validation.constraints.NotNull;
 
+/**
+ * 
+ * @author Artem Kolin
+ * 
+ * Profile Dto for UsersCreationData, also embedded into Users Entity as user Profile
+ *
+ */
 @Embeddable
 public class Profile {
 	

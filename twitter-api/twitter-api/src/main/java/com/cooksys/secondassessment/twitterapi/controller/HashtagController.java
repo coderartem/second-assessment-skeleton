@@ -14,6 +14,14 @@ import com.cooksys.secondassessment.twitterapi.entity.Hashtag;
 import com.cooksys.secondassessment.twitterapi.service.HashtagService;
 import com.cooksys.secondassessment.twitterapi.servlet.response.ServletResponse;
 
+/**
+ * 
+ * @author Artem Kolin 
+ * 
+ * Sending response (not everywhere) from TweetService to ServletResponse component to setup HttpServletResponse to 404 in case returned value is null
+ *
+ */
+
 @RestController
 @RequestMapping("tag")
 public class HashtagController {

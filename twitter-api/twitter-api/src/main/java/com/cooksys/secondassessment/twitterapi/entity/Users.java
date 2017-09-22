@@ -7,7 +7,13 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
-
+/**
+ * 
+ * @author Artem Kolin
+ * 
+ * User Entity, changed name to Users because had issue with database
+ *
+ */
 @Entity
 public class Users {
 	

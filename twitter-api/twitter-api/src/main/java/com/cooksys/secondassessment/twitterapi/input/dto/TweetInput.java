@@ -2,6 +2,14 @@ package com.cooksys.secondassessment.twitterapi.input.dto;
 
 import com.cooksys.secondassessment.twitterapi.entity.Credentials;
 
+/**
+ * 
+ * @author Artem Kolin
+ * 
+ * Dto for Tweet input JSON object
+ *
+ */
+
 public class TweetInput {
 	
 	private String content;

@@ -5,12 +5,19 @@ import java.sql.Timestamp;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.cooksys.secondassessment.twitterapi.entity.Tweet;
 import com.cooksys.secondassessment.twitterapi.entity.Users;
-import com.cooksys.secondassessment.twitterapi.input.dto.InputDto;
+import com.cooksys.secondassessment.twitterapi.input.dto.UsersCreationData;
 import com.cooksys.secondassessment.twitterapi.repository.TweetRepository;
 import com.cooksys.secondassessment.twitterapi.repository.UserRepository;
 
+
+/**
+ * 
+ * @author Artem Kolin
+ * 
+ * This component designed to create based on input parameters, delete, reanimate and modify user
+ *
+ */
 
 @Component
 public class UserFactory {
@@ -23,7 +30,9 @@ public class UserFactory {
 		this.tweetRepository = tweetRepository;
 	}
 		
-	public Users createUser(InputDto input){
+	public Users createUser(UsersCreationData input){
+		
+		//Checks if user just needs to be reanimated, user exists, input mandatory fields are not null
 		
 		if(userRepository.findByCredentialsAndDeleted(input.getCredentials(),true)!=null){
 			Users user = reactivateUser(input.getCredentials().getUsername());
@@ -36,6 +45,9 @@ public class UserFactory {
 		if(input.getCredentials().getPassword()==null || input.getCredentials().getUsername()==null || input.getProfile().getEmail()==null){
 			return null;
 		}
+		
+		//Creating new user, setting up it's values
+		
 			Users user = new Users();
 			user.setUsername(input.getCredentials().getUsername());
 			user.setProfile(input.getProfile());
@@ -47,22 +59,23 @@ public class UserFactory {
 		return user;
 	}
 	
+	//Reactivation of User with reactivation of all of his tweets
+	
 	@Transactional
-	public Users reactivateUser(String usernam) {
+	private Users reactivateUser(String usernam) {
 		Users user = userRepository.findByUsername(usernam);
 		user.setDeleted(false);
-		for(Tweet x : tweetRepository.findByAuthorUsernameAndDeleted(user.getUsername(), true)){
-			x.setDeleted(false);
-		}
+		tweetRepository.findByAuthorUsernameAndDeleted(user.getUsername(), true).forEach(t -> t.setDeleted(false));
 		return user;
 	}
 	
+	//User modification
+	
 	@Transactional
-	public Users patchUser(InputDto input){
+	public Users patchUser(UsersCreationData input){
 		Users user = userRepository.findByCredentialsAndDeleted(input.getCredentials(), false);
 		
 		if(user!=null){
-			
 			if(input.getProfile().getFirstName()!=null){
 				user.getProfile().setFirstName(input.getProfile().getFirstName());
 			}
@@ -80,15 +93,14 @@ public class UserFactory {
 		return null;
 	}
 	
+	//Deactivation of User with deactivation of all of his tweets
 	
 	@Transactional
 	public Users deleteUser(String username){
 		Users user = userRepository.findByUsernameAndDeleted(username, false);
 		if(user==null) return null;
 		user.setDeleted(true);
-		for(Tweet x : tweetRepository.findByAuthorUsernameAndDeleted(user.getUsername(), false)){
-			x.setDeleted(true);
-		}
+		tweetRepository.findByAuthorUsernameAndDeleted(user.getUsername(), false).forEach(t -> t.setDeleted(true));
 		
 		return user;
 	}

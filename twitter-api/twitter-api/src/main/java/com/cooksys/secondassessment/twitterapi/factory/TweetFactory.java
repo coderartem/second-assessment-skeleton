@@ -20,7 +20,13 @@ import com.cooksys.secondassessment.twitterapi.repository.MentionRepsoitory;
 import com.cooksys.secondassessment.twitterapi.repository.TweetRepository;
 import com.cooksys.secondassessment.twitterapi.repository.UserRepository;
 
-
+/**
+ * 
+ * @author Artem Kolin
+ * 
+ * This component designed to create based on input parameters and delete Tweet(s) as well as process Hashtag(s) and Mention(s) from content
+ *
+ */
 @Component
 public class TweetFactory {
 	
@@ -37,25 +43,38 @@ public class TweetFactory {
 		this.mentionRepsoitory = mentionRepsoitory;
 	}
 	
-	public Tweet createTweet(TweetInput tweetIn){
+	/**
+	 * Creating new Tweet, setting up values based on input
+	 * @param tweetInput
+	 * @return Tweet
+	 */
+	
+	public Tweet createNewTweet(TweetInput tweetInput){
 			Tweet tweet = new Tweet();
-			Users user = userRepository.findByCredentialsAndDeleted(tweetIn.getCredentials(), false);
+			Users user = userRepository.findByCredentialsAndDeleted(tweetInput.getCredentials(), false);  //Checking if user exists and active
 			if(user==null) return null;
 			
 			tweet.setAuthor(user); 
 			tweet.setPosted(new Timestamp(System.currentTimeMillis()).getTime());
-			tweet.setContent(tweetIn.getContent());
+			tweet.setContent(tweetInput.getContent());
 			tweet.setDeleted(false);
-			tweet.setHashtag(tagsCheck(tweetIn.getContent()));
-			tweet.setMentions(mentionsCheck(tweetIn.getContent()));
+			tweet.setHashtag(tagsCheck(tweetInput.getContent()));
+			tweet.setMentions(mentionsCheck(tweetInput.getContent()));
 			
 			tweetRepository.saveAndFlush(tweet);
 			
 		return tweet;
 	}
 	
+	/**
+	 * Looking for Hashtag(s) inside Tweet and matching that tag to already existing tags
+	 * Creating new if it doesn't exist
+	 * @param content - Tweet content
+	 * @return List<Hashtag> - list of Hashtag(s) found
+	 */
+	
 	@Transactional
-	public List<Hashtag> tagsCheck(String content){
+	private List<Hashtag> tagsCheck(String content){
 		
 		Matcher hashTag = Pattern.compile("#(\\w+)").matcher(content);
 		List<Hashtag> tagsList = new ArrayList<>();
@@ -73,8 +92,15 @@ public class TweetFactory {
 		return tagsList;
 	}
 	
+	/**
+	 * Looking for Mention(s) inside Tweet and matching that mention to existing users
+	 * Creating new if it doesn't exist
+	 * @param content - Tweet content
+	 * @return List<Mention> - list of Mention(s) found
+	 */
+	
 	@Transactional
-	public List<Mention> mentionsCheck(String content){
+	private List<Mention> mentionsCheck(String content){
 		
 		Matcher mention = Pattern.compile("@(\\w+)").matcher(content);
 		List<Mention> mentionsList = new ArrayList<>();
@@ -95,18 +121,21 @@ public class TweetFactory {
 		return mentionsList;
 	}
 	
+	//Deletion of Tweet
+	
 	@Transactional
 	public Tweet deleteTweet(Integer id, Credentials cred){
-		Tweet tweet = tweetRepository.findByAuthorCredentialsAndIdAndDeletedAndAuthorDeleted(cred, id,false,false);
-		if(tweet!=null){
-			tweet.setDeleted(true);
+		Tweet tweet = tweetRepository.findByAuthorCredentialsAndIdAndDeletedAndAuthorDeleted(cred, id,false,false);  
+		if(tweet!=null){ 		//Checking if Tweet exists and active and Author exitsts and active
+			tweet.setDeleted(true); 		//Disabling Tweet
 			return tweet;
 		}
 		return null;
 	}
 	
+	//Creation of repostTweet (content is empty)
 	public Tweet createRepostTweet(Credentials cred){
 		TweetInput input = new TweetInput("",cred);
-		return  createTweet(input);
+		return  createNewTweet(input);
 	}
 }

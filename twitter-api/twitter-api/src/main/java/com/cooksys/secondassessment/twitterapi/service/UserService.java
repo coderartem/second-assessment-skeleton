@@ -12,12 +12,22 @@ import com.cooksys.secondassessment.twitterapi.entity.Credentials;
 import com.cooksys.secondassessment.twitterapi.entity.Users;
 import com.cooksys.secondassessment.twitterapi.factory.Sorter;
 import com.cooksys.secondassessment.twitterapi.factory.UserFactory;
-import com.cooksys.secondassessment.twitterapi.input.dto.InputDto;
+import com.cooksys.secondassessment.twitterapi.input.dto.UsersCreationData;
 import com.cooksys.secondassessment.twitterapi.mapper.TweetMapper;
 import com.cooksys.secondassessment.twitterapi.mapper.UserMapper;
 import com.cooksys.secondassessment.twitterapi.repository.TweetRepository;
 import com.cooksys.secondassessment.twitterapi.repository.UserRepository;
 
+/**
+ * 
+ * @author Artem Kolin
+ * 
+ * Names of methods are pretty informative themselves
+ * Implementing everywhere null checks on returned from data base information (Users, Tweet(s))
+ * Sending List<> results to Sorter injected component to sort them in DESC order based on timestamps (in ASC in case of Mention(s))
+ * Using UserMapper to convert Entities to Dtos
+ * Using injected UserFactory component to create, modify, delete and reactivate Users
+ */
 @Service
 public class UserService {
 
@@ -45,11 +55,11 @@ public class UserService {
 		return userMapper.userToUserDto(userRepository.findByUsernameAndDeleted(username, false));
 	}
 
-	public UserDto createNewUser(InputDto input) {
+	public UserDto createNewUser(UsersCreationData input) {
 		return userMapper.userToUserDto(usersFactory.createUser(input));
 	}
 
-	public List<UserDto> getAllUsers() {
+	public List<UserDto> getAllActiveUsers() {
 		List<UserDto> userList = userMapper.usersToUsersDto(userRepository.findByDeleted(false));
 		return userList!=null?sort.sortUsers(userList):null;
 	}
@@ -61,15 +71,21 @@ public class UserService {
 	}
 
 	
-	public UserDto updateThisMF(String username, InputDto input) {
+	public UserDto updateThisMF(String username, UsersCreationData input) {
 		Users user = usersFactory.patchUser(input);
 		return userMapper.userToUserDto(user);
 	}
 
+	/**
+	 * Getting user with this username and future follower with these credentials from database and add them to following/follower lists of each other
+	 * @param username of User
+	 * @param credentials of follower
+	 * @return boolean
+	 */
 	@Transactional
-	public boolean followHim(String username, Credentials cred) {
+	public boolean followHim(String username, Credentials credentials) {
 			Users user = userRepository.findByUsernameAndDeleted(username, false);
-			Users follower = userRepository.findByCredentialsAndDeleted(cred, false);
+			Users follower = userRepository.findByCredentialsAndDeleted(credentials, false);
 			if(user!=null && follower!=null && userRepository.findByUsernameAndFollowersCredentials(user.getUsername(), 
 					follower.getCredentials())==null && follower!=user){
 				user.getFollowers().add(follower);
@@ -78,10 +94,17 @@ public class UserService {
 			}else return false;
 	}
 
+	/**
+	 * 
+	 * Getting user with this username and future follower with these credentials from database and remove them to following/follower lists of each other
+	 * @param username of User
+	 * @param credentials of follower
+	 * @return boolean
+	 */
 	@Transactional
-	public boolean unfollowHim(String username, Credentials cred) {
+	public boolean unfollowHim(String username, Credentials credentials) {
 		Users user = userRepository.findByUsernameAndDeleted(username, false);
-		Users follower = userRepository.findByCredentialsAndDeleted(cred, false);
+		Users follower = userRepository.findByCredentialsAndDeleted(credentials, false);
 		if(user!=null && follower!=null && userRepository.findByUsernameAndFollowersCredentials(user.getUsername(), 
 				follower.getCredentials())!=null){
 			user.getFollowers().remove(follower);
@@ -91,25 +114,37 @@ public class UserService {
 	}
 
 
-	public List<TweetDto> getFeed(String username) {
+	/**
+	 * Getting user with this username from database, getting all his tweets (using authorTweets() method from TweetService for that) and then getting everybody
+	 * this user follows from his following list and do same thing for them. At the end adding all tweets received in a list and send it to Sorter component 
+	 * @param username of this user
+	 * @return List<TweetDto> - feed of this user
+	 */
+	public List<TweetDto> getUserFeed(String username) {
 		Users user = userRepository.findByUsernameAndDeleted(username, false);
-		List<TweetDto> res=new ArrayList<>();
-		if(user!=null){											
-			res.addAll(tweetService.authorTweets(username));
-			for(Users x : user.getFollowing()){
-				res.addAll(tweetService.authorTweets(x.getUsername()));
-			}
-			return sort.sortTweets(res);
-		}
-		return null;
+		List<TweetDto> feed=new ArrayList<>();
+		if(user==null)return null;											
+			feed.addAll(tweetService.authorTweets(username));
+			user.getFollowing().forEach(f -> feed.addAll(tweetService.authorTweets(f.getUsername())));
+			return sort.sortTweets(feed);
 	}
 	
-	public List<TweetDto> getTweets(String username){
+	/**
+	 *  Getting user with this username from database, getting all his tweets (using authorTweets() method from TweetService for that)
+	 * @param username of this user
+	 * @return List<TweetDto> - all undeleted tweets of this user
+	 */
+	public List<TweetDto> getUserTweets(String username){
 		Users user = userRepository.findByUsernameAndDeleted(username, false);
 		if(user==null)return null; 
-			return  tweetService.authorTweets(username);
+			return  tweetService.authorTweets(username);   //There is sorting in authorTweets() already so don't need to implement it here
 	}
 
+	/**
+	 * Looking for user with this username in database and getting people he following from his following list 
+	 * @param username of this user
+	 * @return List<UserDto> 
+	 */
 	public List<UserDto> whoAmIFollowing(String username) {
 		Users user = userRepository.findByUsernameAndDeleted(username, false);
 		if(user==null)return null;
@@ -119,7 +154,11 @@ public class UserService {
 		return userList!=null?sort.sortUsers(userList):null;
 	}
 
-
+	/**
+	 * Looking for user with this username in database and his followers from his followers list 
+	 * @param username of this user
+	 * @return List<UserDto> - of followers
+	 */
 	public List<UserDto> myFanClub(String username) {
 		Users user = userRepository.findByUsernameAndDeleted(username, false);
 		if(user==null)return null;
@@ -130,7 +169,12 @@ public class UserService {
 	}
 
 
-	public List<TweetDto> whereUserMentioned(String username) {
+	/**
+	 * Getting list of tweets where this user was mentioned by matching his username against mentions lists saved in tweets
+	 * @param username of this user
+	 * @return List<TweetDto> - all tweets this user was mentioned in
+	 */
+	public List<TweetDto> userMentions(String username) {
 		List<TweetDto> tweetList = tweetMapper.tweetsToTweetDtos(tweetRepository.findByDeletedAndMentionsMention(false, "@"+username));
 		return tweetList!=null?sort.sortTweets(tweetList):null;
 	}
